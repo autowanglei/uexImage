@@ -26,4 +26,14 @@ public class Constants {
 
     public static final String HTTP = "http";
     public static final int OPERATION_CANCELLED = 1000;
+
+    public static final String UI_STYLE = "style";
+    /** 插件旧风格UI */
+    public static final int OLD_STYLE = 0;
+    /** 插件新风格UI，仿微信优化 */
+    public static final int NEW_STYLE = 1;
+    public static final int WHAT_HIDE_IV_TO_GRID = 0;
+    public static final int WHAT_SHOW_IV_TO_GRID = 1;
+    public static final int HIDE_IV_TO_GRID_TIMEOUT = 3000;
+    public static final int SHOW_IV_TO_GRID_TIMEOUT = 500;
 }

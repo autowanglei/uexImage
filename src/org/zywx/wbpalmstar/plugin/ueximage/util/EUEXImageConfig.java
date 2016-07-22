@@ -66,7 +66,8 @@ public class EUEXImageConfig {
     //是否是浏览图片
     private boolean isOpenBrowser;
 
-
+    // UI样式
+    private int style;
 
     public int getMaxImageCount() {
         return maxImageCount;
@@ -162,5 +163,13 @@ public class EUEXImageConfig {
 
     public void setIsOpenBrowser(boolean isOpenBrowser) {
         this.isOpenBrowser = isOpenBrowser;
+    }
+
+    public int getUIStyle() {
+        return style;
+    }
+
+    public void setUIStyle(int style) {
+        this.style = style;
     }
 }

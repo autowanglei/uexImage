@@ -57,7 +57,7 @@
         <item name="android:shadowRadius">1</item>
     </style>
 
-    <style name="Style_platform_dialog" parent="android:style/Theme.Dialog">
+    <style name="Style_plugin_uexActionSheet_dialog" parent="android:style/Theme.Dialog">
         <item name="android:windowFrame">@null</item>
         <!-- 边框 -->
         <item name="android:windowIsFloating">true</item>

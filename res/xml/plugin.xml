@@ -9,4 +9,9 @@
         <method name="clearOutputImages" />
         <method name="saveToPhotoAlbum" />
     </plugin>
+    <plugin
+        className="org.zywx.wbpalmstar.plugin.uexActionSheet.EUExActionSheet" 
+        uexName="uexActionSheet" version="3.0" build="0">
+        <method name="open"/>
+    </plugin>
 </uexplugins>

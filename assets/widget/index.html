@@ -20,24 +20,63 @@
 		uexImage.openPicker(data);
 	}
 
+	
+    function createActionSheet(){
+
+//        uexActionSheet.onClickItem = onClickItem;
+
+        
+
+        var x = 0;
+
+        var y = 0;//没有用
+
+        var width = 0;//如果传0，默认是屏幕宽度
+
+        var height = 0;//没用的高度
+
+        
+
+        //var JsonData = '{"actionSheet_style":{"frameBgColor":"#ffffff","frameBroundColor":"#ff0000","frameBgImg":"","btnSelectBgImg":"res://btn-act.png","btnUnSelectBgImg":"res://btn.png","cancelBtnSelectBgImg":"res://cancel-act.png","cancelBtnUnSelectBgImg":"res://cancel.png","textSize":"17","textColor":"#ffffff","actionSheetList":[{"name":"新浪微博"},{"name":"腾讯微博"},{"name":"分享"}]}}';
+        
+        var JsonData = '{"actionSheet_style":{"frameBgColor":"#ffffff","frameBroundColor":"#ff0000","frameBgImg":"","btnSelectBgImg":"res://btn-act.png","btnUnSelectBgImg":"res://btn.png","cancelBtnSelectBgImg":"res://cancel-act.png","cancelBtnUnSelectBgImg":"res://cancel.png","textSize":"17","textNColor":"#ffffff","textHColor":"#ffffff", "cancelTextNColor":"#ffffff","cancelTextHColor":"#ffffff", "actionSheetList":[{"name":"新浪微博"},{"name":"腾讯微博"},{"name":"分享"}]}}';
+
+        uexActionSheet.open(x,y,width,height,JsonData);
+
+    }
+	
 	function openBrowser() {
 		var params = {
-			"displayActionButton" : true,
+			"displayActionButton" : false,
 			"displayNavArrows" : true,
 			"enableGrid" : true,
 			"startOnGrid" : false,
 			"startIndex" : 1,
+			"style" : 1,
 			data : [
 					{
-						"src" : "http://img0.imgtn.bdimg.com/it/u=2416840456,1080513470&fm=21&gp=0.jpg"
+						"src" : "res://1016.jpg"
 					},
 					{
-						"src" : "res://test.png"
+					    "src" : "res://photo2.jpg"
+					},
+					{
+					    "src" : "res://photo3.jpg"
+					},
+					{
+					    "src" : "res://photo4.jpg"
+					},
+					{
+					    "src" : "res://photo4t.jpg"
+					},
+					{
+						"src" : "res://photo1.jpg"
 					}
 				   ]
 		};
 		var data = JSON.stringify(params);
 		uexImage.openBrowser(data);
+		
 	}
 	function openPickerForCropper() {
 		uexImage.onPickerClosed = onPickerClosedForCropper;
@@ -87,11 +126,18 @@
 			uexImage.onCropperClosed = onCropperClosed;
 			uexImage.cbSaveToPhotoAlbum = cbSaveToPhotoAlbum;
 			uexImage.cbClearOutputImages = cbClearOutputImages;
+			uexImage.onIamgeLongClicked = onIamgeLongClicked;
 		}
 	}
 
+	function onIamgeLongClicked(info) {
+		alert("onIamgeLongClicked:" + info);
+
+        createActionSheet();
+	}
+	
 	function cbOpenPicker(info) {
-		alert("cbOpenPicker:" + info);
+	    alert("onIamgeLongClicked:" + info);
 	}
 	function onPickerClosed(info) {
 		alert("onPickerClosed:" + info);

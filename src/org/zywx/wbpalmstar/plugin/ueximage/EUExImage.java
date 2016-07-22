@@ -18,15 +18,9 @@
  */
 package org.zywx.wbpalmstar.plugin.ueximage;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
-import android.os.Environment;
-import android.text.TextUtils;
-import android.util.Log;
-import android.widget.Toast;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,9 +36,15 @@ import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
 import org.zywx.wbpalmstar.plugin.ueximage.util.EUEXImageConfig;
 import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Environment;
+import android.text.TextUtils;
+import android.util.Log;
+import android.widget.Toast;
 
 
 public class EUExImage extends EUExBase {
@@ -71,6 +71,7 @@ public class EUExImage extends EUExBase {
     private final String SAME_FILE_IN_DCIM = "系统相册中存在同名文件";
     private final String JSON_FORMAT_ERROR = "json格式错误";
     private final String NOT_SUPPORT_CROP = "你的设备不支持剪切功能！";
+    private static EUExImage mEuExImage = null;
 
 
     public EUExImage(Context context, EBrowserView eBrowserView) {
@@ -85,6 +86,10 @@ public class EUExImage extends EUExBase {
         CommonUtil.initImageLoader(context);
         uexImageUtil = UEXImageUtil.getInstance();
         finder = ResoureFinder.getInstance(context);
+        if(null == mEuExImage)
+        {
+            mEuExImage = this;
+        }
 
     }
 
@@ -207,7 +212,9 @@ public class EUExImage extends EUExBase {
                 }
                 config.setStartIndex(startIndex);
             }
-            JSONArray data = config.getDataArray();
+            if (jsonObject.has(Constants.UI_STYLE)) {
+                config.setUIStyle(jsonObject.optInt(Constants.UI_STYLE));
+            }
 
             config.setIsOpenBrowser(true);
             Intent intent;
@@ -478,7 +485,6 @@ public class EUExImage extends EUExBase {
         }
     }
 
-
     public void clearOutputImages(String[] params) {
         JSONObject jsonResult = new JSONObject();
         File directory = new File(Environment.getExternalStorageDirectory(),
@@ -492,6 +498,10 @@ public class EUExImage extends EUExBase {
             Log.i(TAG, e.getMessage());
         }
         callBackPluginJs(JsConst.CALLBACK_CLEAR_OUTPUT_IMAGES, jsonResult.toString());
+    }
+
+    public static void onImageLongClick() {
+        mEuExImage.callBackPluginJs(JsConst.CALLBACK_ON_IAMGE_LONG_CLICKED, "");
     }
 
     private void callBackPluginJs(String methodName, String jsonData){
