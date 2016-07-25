@@ -19,6 +19,7 @@
 package org.zywx.wbpalmstar.plugin.ueximage.util;
 
 import org.json.JSONArray;
+import org.zywx.wbpalmstar.plugin.ueximage.vo.ViewFrameVO;
 
 
 /**
@@ -68,6 +69,8 @@ public class EUEXImageConfig {
 
     // UI样式
     private int style;
+
+    private ViewFrameVO viewFrameVO = new ViewFrameVO();
 
     public int getMaxImageCount() {
         return maxImageCount;
@@ -171,5 +174,13 @@ public class EUEXImageConfig {
 
     public void setUIStyle(int style) {
         this.style = style;
+    }
+
+    public ViewFrameVO getViewFrameVO() {
+        return viewFrameVO;
+    }
+
+    public void setViewFrameVO(ViewFrameVO viewFrameVO) {
+        this.viewFrameVO = viewFrameVO;
     }
 }

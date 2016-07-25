@@ -33,6 +33,7 @@ import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.plugin.ueximage.crop.Crop;
 import org.zywx.wbpalmstar.plugin.ueximage.util.CommonUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
+import org.zywx.wbpalmstar.plugin.ueximage.util.DataParser;
 import org.zywx.wbpalmstar.plugin.ueximage.util.EUEXImageConfig;
 import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
 
@@ -220,6 +221,11 @@ public class EUExImage extends EUExBase {
                 config.setUIStyle(jsonObject.optInt(Constants.UI_STYLE));
             }
 
+            if (jsonObject.has(Constants.VIEW_FRAME_VO)) {
+                config.setViewFrameVO(DataParser.viewFrameVOParser(
+                        jsonObject.optInt(Constants.VIEW_FRAME_VO)));
+            }
+
             config.setIsOpenBrowser(true);
             Intent intent;
             View imagePreviewView = null;
@@ -227,7 +233,7 @@ public class EUExImage extends EUExBase {
             DisplayMetrics outMetrics = new DisplayMetrics();
             manager.getDefaultDisplay().getMetrics(outMetrics);
             int width = outMetrics.widthPixels;
-            int height = outMetrics.heightPixels;
+            int height = outMetrics.heightPixels - 45;
 
             if (config.isStartOnGrid()) {
                 intent = new Intent(context, PictureGridActivity.class);
@@ -246,7 +252,6 @@ public class EUExImage extends EUExBase {
             Toast.makeText(context, "JSON解析错误", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     public void openCropper(String[] params) {
         if (params == null || params.length < 1) {
