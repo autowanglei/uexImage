@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.zywx.wbpalmstar.base.BDebug;
-import org.zywx.wbpalmstar.base.ResoureFinder;
+import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.model.PictureInfo;
 import org.zywx.wbpalmstar.plugin.ueximage.util.CommonUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
@@ -33,12 +33,10 @@ import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
 import com.ace.universalimageloader.core.DisplayImageOptions;
 import com.ace.universalimageloader.core.ImageLoader;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -47,8 +45,6 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.LinearInterpolator;
@@ -60,9 +56,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ImagePreviewActivity extends Activity {
+public class ImagePreviewActivity extends RelativeLayout {
 
     private final String TAG = "ImagePreviewActivity";
+    private Context mContext;
     private ViewPager viewPager;
     private String folderName;
     private ImageView ivGoBack;
@@ -81,7 +78,6 @@ public class ImagePreviewActivity extends Activity {
     private TextView tvToGrid;
     /** * 切换到Grid浏览模式 */
     private ImageView ivToGrid;
-    private ResoureFinder finder;
     private RelativeLayout rlTitle;
     private RelativeLayout rlBottom;
     private AlphaAnimation fadeInAnim;
@@ -105,53 +101,63 @@ public class ImagePreviewActivity extends Activity {
         }
     };
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        finder = ResoureFinder.getInstance(this);
-        setContentView(finder.getLayoutId("plugin_uex_image_activity_image_preview"));
+    public ImagePreviewActivity(Context context, String folderName,
+            int picIndex) {
+        super(context);
+        mContext = context;
+        initView(context, folderName, picIndex);
+    }
+
+    private void initView(Context context, String folderName, int picIndex) {
+        LayoutInflater.from(context).inflate(
+                EUExUtil.getResLayoutID(
+                        "plugin_uex_image_activity_image_preview"),
+                this, true);
         uexImageUtil = UEXImageUtil.getInstance();
         isOpenBrowser = EUEXImageConfig.getInstance().getIsOpenBrowser();
-
-        rlTitle = (RelativeLayout) findViewById(finder.getId("title_layout"));
-        ivGoBack = (ImageView) findViewById(finder.getId("iv_left_on_title"));
-        tvTitle = (TextView) findViewById(finder.getId("tv_title"));
-        ivToGrid = (ImageView) findViewById(finder.getId("iv_to_grid"));
-        btnFinishInTitle = (Button) findViewById(finder.getId("btn_finish_title"));
-        viewPager = (ViewPager) findViewById(finder.getId("vp_picture"));
-        cbChoose = (CheckBox) findViewById(finder.getId("checkbox"));
-        rlBottom = (RelativeLayout) findViewById(finder.getId("rl_bottom"));
+        rlTitle = (RelativeLayout) findViewById(
+                EUExUtil.getResIdID("title_layout"));
+        ivGoBack = (ImageView) findViewById(
+                EUExUtil.getResIdID("iv_left_on_title"));
+        tvTitle = (TextView) findViewById(EUExUtil.getResIdID("tv_title"));
+        ivToGrid = (ImageView) findViewById(EUExUtil.getResIdID("iv_to_grid"));
+        btnFinishInTitle = (Button) findViewById(
+                EUExUtil.getResIdID("btn_finish_title"));
+        viewPager = (ViewPager) findViewById(EUExUtil.getResIdID("vp_picture"));
+        cbChoose = (CheckBox) findViewById(EUExUtil.getResIdID("checkbox"));
+        rlBottom = (RelativeLayout) findViewById(
+                EUExUtil.getResIdID("rl_bottom"));
         rlTitle.setAlpha(0.9f);
         rlBottom.setAlpha(0.9f);
 
-        initData();
+        initData(folderName, picIndex);
         if (isOpenBrowser) {
-            initViewForBrowser();
+            initViewForBrowser(context);
         } else {
-            initViewForPicker();
+            initViewForPicker(context);
         }
         initAnimation();
     }
 
-    private void initData() {
+    private void initData(String folder, int index) {
         if (isOpenBrowser) {
             JSONArray imageDataArray  = EUEXImageConfig.getInstance().getDataArray();
             picList = uexImageUtil.transformData(imageDataArray);
             picIndex = EUEXImageConfig.getInstance().getStartIndex();
         } else {
-            folderName = getIntent().getExtras().getString(Constants.EXTRA_FOLDER_NAME);
-            picIndex = getIntent().getExtras().getInt(Constants.EXTRA_PIC_INDEX);
+            folderName = folder;
+            picIndex = index;
             checkedItems = uexImageUtil.getCheckedItems();
             picList = uexImageUtil.getCurrentPicList();
         }
     }
 
-    private void initViewForPicker() {
+    private void initViewForPicker(final Context context) {
         tvTitle.setText(folderName);
         ivGoBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+//                finish();
             }
         });
         viewPager.setAdapter(adapter);
@@ -167,11 +173,14 @@ public class ImagePreviewActivity extends Activity {
             @Override
             public void onClick(View view) {
                 if (checkedItems.size() >=  EUEXImageConfig.getInstance().getMinImageCount()) {
-                    setResult(RESULT_OK, null);
-                    finish();
+//                    setResult(RESULT_OK, null);
+//                    finish();
                 } else {
-                    String str = String.format(finder.getString("plugin_uex_image_at_least_choose"),  EUEXImageConfig.getInstance().getMinImageCount());
-                    Toast.makeText(ImagePreviewActivity.this, str, Toast.LENGTH_SHORT).show();
+                    String str = String.format(
+                            EUExUtil.getString(
+                                    "plugin_uex_image_at_least_choose"),
+                            EUEXImageConfig.getInstance().getMinImageCount());
+                    Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -197,23 +206,25 @@ public class ImagePreviewActivity extends Activity {
     }
 
     private void startPictureGridActivity() {
-        Intent intent = new Intent(ImagePreviewActivity.this,
-                PictureGridActivity.class);
-        startActivity(intent);
-        finish();
+//        Intent intent = new Intent(ImagePreviewActivity.this,
+//                PictureGridActivity.class);
+//        startActivity(intent);
+//        finish();
     }
 
-    private void initViewForBrowser() {
+    private void initViewForBrowser(final Context context) {
 
         ivGoBack.setVisibility(View.INVISIBLE);
-        tvCheckbox = (TextView) findViewById(finder.getId("tv_checkbox"));
+        tvCheckbox = (TextView) findViewById(
+                EUExUtil.getResIdID("tv_checkbox"));
         cbChoose.setVisibility(View.INVISIBLE);
         tvCheckbox.setVisibility(View.INVISIBLE);
 
         switch (EUEXImageConfig.getInstance().getUIStyle()) {
         case Constants.OLD_STYLE:
-            tvShare = (TextView) findViewById(finder.getId("tv_share"));
-            tvToGrid = (TextView) findViewById(finder.getId("tv_to_grid"));
+            tvShare = (TextView) findViewById(EUExUtil.getResIdID("tv_share"));
+            tvToGrid = (TextView) findViewById(
+                    EUExUtil.getResIdID("tv_to_grid"));
             tvToGrid.setVisibility(View.VISIBLE);
             tvToGrid.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -226,8 +237,8 @@ public class ImagePreviewActivity extends Activity {
 
                 @Override
                 public void onClick(View v) {
-                    setResult(RESULT_OK, null);
-                    finish();
+                    // setResult(RESULT_OK, null);
+                    // finish();
                 }
             });
             if (EUEXImageConfig.getInstance().isDisplayActionButton()) {
@@ -243,8 +254,7 @@ public class ImagePreviewActivity extends Activity {
                             bitmap = ImageLoader.getInstance()
                                     .loadImageSync(src);
                         } else {
-                            bitmap = CommonUtil.getLocalImage(
-                                    ImagePreviewActivity.this, src);
+                            bitmap = CommonUtil.getLocalImage(context, src);
                         }
                         File file = new File(
                                 Environment.getExternalStorageDirectory(),
@@ -252,7 +262,7 @@ public class ImagePreviewActivity extends Activity {
                                         + File.separator
                                         + "uex_image_to_share.jpg");
                         if (bitmap == null) {
-                            Toast.makeText(ImagePreviewActivity.this,
+                            Toast.makeText(context,
                                     "当前图片尚未加载完毕，请稍后重试", Toast.LENGTH_SHORT)
                                     .show();
                             return;
@@ -263,10 +273,10 @@ public class ImagePreviewActivity extends Activity {
                             shareIntent.putExtra(Intent.EXTRA_STREAM,
                                     Uri.fromFile(file));
                             shareIntent.setType("image/*");
-                            startActivity(
-                                    Intent.createChooser(shareIntent, "分享到"));
+                            // startActivity(
+                            // Intent.createChooser(shareIntent, "分享到"));
                         } else {
-                            Toast.makeText(ImagePreviewActivity.this,
+                            Toast.makeText(context,
                                     "图片操作失败，请重试", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -309,18 +319,18 @@ public class ImagePreviewActivity extends Activity {
                 Constants.HIDE_IV_TO_GRID_TIMEOUT);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(!isOpenBrowser) {
-            cbChoose.setChecked(checkedItems.contains(picList.get(picIndex)));
-        }
-        if(1==picList.size()){
-        	tvTitle.setText( "1" + "/" + picList.size());
-        }else{
-        	tvTitle.setText((picIndex + 1) + "/" + picList.size());
-        }
-    }
+    // @Override
+    // protected void onResume() {
+    // super.onResume();
+    // if(!isOpenBrowser) {
+    // cbChoose.setChecked(checkedItems.contains(picList.get(picIndex)));
+    // }
+    // if(1==picList.size()){
+    // tvTitle.setText( "1" + "/" + picList.size());
+    // }else{
+    // tvTitle.setText((picIndex + 1) + "/" + picList.size());
+    // }
+    // }
 
     private PagerAdapter adapter = new PagerAdapter() {
 
@@ -337,15 +347,19 @@ public class ImagePreviewActivity extends Activity {
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             LayoutInflater inflater = (LayoutInflater) container.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View view = inflater.inflate(finder.getLayoutId("plugin_uex_image_view_pager_item"), null);
-            imageView = (ImageView) view.findViewById(finder.getId("image"));
+            View view = inflater.inflate(
+                    EUExUtil.getResLayoutID("plugin_uex_image_view_pager_item"),
+                    null);
+            imageView = (ImageView) view
+                    .findViewById(EUExUtil.getResIdID("image"));
 
             //显示图片的配置
             DisplayImageOptions options = new DisplayImageOptions.Builder()
                     .cacheInMemory(true)
                     .cacheOnDisk(true)
                     .bitmapConfig(Bitmap.Config.RGB_565)
-                    .showImageOnLoading(finder.getDrawableId("plugin_uex_image_loading"))
+                    .showImageOnLoading(
+                            EUExUtil.getResIdID("plugin_uex_image_loading"))
                     .considerExifParams(true)//考虑Exif旋转
                     .build();
 
@@ -357,7 +371,7 @@ public class ImagePreviewActivity extends Activity {
                     //如果是从网上下载图片，需要将下载后的图片存到缓存中
                     ImageLoader.getInstance().displayImage(src,imageView, options);
                 } else {
-                    Bitmap bitmap= CommonUtil.getLocalImage(ImagePreviewActivity.this, src);
+                    Bitmap bitmap = CommonUtil.getLocalImage(mContext, src);
                     imageView.setImageBitmap(bitmap);
                 }
             }
@@ -394,8 +408,8 @@ public class ImagePreviewActivity extends Activity {
                     hideIvToGridHandler
                             .removeMessages(Constants.WHAT_SHOW_IV_TO_GRID);
                 }
-                setResult(RESULT_OK, null);
-                finish();
+                // setResult(RESULT_OK, null);
+                // finish();
                 break;
             default:
                 break;
@@ -469,7 +483,10 @@ public class ImagePreviewActivity extends Activity {
             if (isChecked) {
                 if (!checkedItems.contains(buttonView.getTag())) {
                     if(checkedItems.size() >=  EUEXImageConfig.getInstance().getMaxImageCount()){
-                        Toast.makeText(ImagePreviewActivity.this, "最多选择" +  EUEXImageConfig.getInstance().getMaxImageCount() + "张图片", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext,
+                                "最多选择" + EUEXImageConfig.getInstance()
+                                        .getMaxImageCount() + "张图片",
+                                Toast.LENGTH_SHORT).show();
                         buttonView.setChecked(false);
                         return;
                     }

@@ -43,7 +43,11 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 
@@ -218,12 +222,25 @@ public class EUExImage extends EUExBase {
 
             config.setIsOpenBrowser(true);
             Intent intent;
+            View imagePreviewView = null;
+            WindowManager manager = ((Activity) mContext).getWindowManager();
+            DisplayMetrics outMetrics = new DisplayMetrics();
+            manager.getDefaultDisplay().getMetrics(outMetrics);
+            int width = outMetrics.widthPixels;
+            int height = outMetrics.heightPixels;
+
             if (config.isStartOnGrid()) {
                 intent = new Intent(context, PictureGridActivity.class);
+                startActivityForResult(intent, REQUEST_IMAGE_BROWSER);
             } else {
-                intent = new Intent(context, ImagePreviewActivity.class);
+                imagePreviewView = new ImagePreviewActivity(context, "", 1);
+                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                        width, height);
+                lp.leftMargin = 0;
+                lp.topMargin = 0;
+                addViewToCurrentWindow(imagePreviewView, lp);
+//                intent = new Intent(context, ImagePreviewActivity.class);
             }
-            startActivityForResult(intent, REQUEST_IMAGE_BROWSER );
         } catch (JSONException e) {
             e.printStackTrace();
             Toast.makeText(context, "JSON解析错误", Toast.LENGTH_SHORT).show();
