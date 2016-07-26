@@ -56,10 +56,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ImagePreviewActivity extends RelativeLayout {
+public class ImagePreviewActivity extends ImageBaseView {
 
-    private final String TAG = "ImagePreviewActivity";
-    private Context mContext;
+    public final static String TAG = "ImagePreviewView";
     private ViewPager viewPager;
     private String folderName;
     private ImageView ivGoBack;
@@ -101,9 +100,10 @@ public class ImagePreviewActivity extends RelativeLayout {
         }
     };
 
-    public ImagePreviewActivity(Context context, String folderName,
+    public ImagePreviewActivity(Context context, EUExImage mEUExImage,
+            String folderName,
             int picIndex) {
-        super(context);
+        super(context, mEUExImage);
         mContext = context;
         initView(context, folderName, picIndex);
     }
@@ -157,7 +157,7 @@ public class ImagePreviewActivity extends RelativeLayout {
         ivGoBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                finish();
+                finish();
             }
         });
         viewPager.setAdapter(adapter);
@@ -174,7 +174,7 @@ public class ImagePreviewActivity extends RelativeLayout {
             public void onClick(View view) {
                 if (checkedItems.size() >=  EUEXImageConfig.getInstance().getMinImageCount()) {
 //                    setResult(RESULT_OK, null);
-//                    finish();
+                    finish();
                 } else {
                     String str = String.format(
                             EUExUtil.getString(
@@ -209,7 +209,7 @@ public class ImagePreviewActivity extends RelativeLayout {
 //        Intent intent = new Intent(ImagePreviewActivity.this,
 //                PictureGridActivity.class);
 //        startActivity(intent);
-//        finish();
+        finish();
     }
 
     private void initViewForBrowser(final Context context) {
@@ -238,7 +238,7 @@ public class ImagePreviewActivity extends RelativeLayout {
                 @Override
                 public void onClick(View v) {
                     // setResult(RESULT_OK, null);
-                    // finish();
+                    finish();
                 }
             });
             if (EUEXImageConfig.getInstance().isDisplayActionButton()) {
@@ -319,18 +319,17 @@ public class ImagePreviewActivity extends RelativeLayout {
                 Constants.HIDE_IV_TO_GRID_TIMEOUT);
     }
 
-    // @Override
-    // protected void onResume() {
-    // super.onResume();
-    // if(!isOpenBrowser) {
-    // cbChoose.setChecked(checkedItems.contains(picList.get(picIndex)));
-    // }
-    // if(1==picList.size()){
-    // tvTitle.setText( "1" + "/" + picList.size());
-    // }else{
-    // tvTitle.setText((picIndex + 1) + "/" + picList.size());
-    // }
-    // }
+    @Override
+    public void onResume() {
+        if (!isOpenBrowser) {
+            cbChoose.setChecked(checkedItems.contains(picList.get(picIndex)));
+        }
+        if (1 == picList.size()) {
+            tvTitle.setText("1" + "/" + picList.size());
+        } else {
+            tvTitle.setText((picIndex + 1) + "/" + picList.size());
+        }
+    }
 
     private PagerAdapter adapter = new PagerAdapter() {
 
@@ -380,7 +379,7 @@ public class ImagePreviewActivity extends RelativeLayout {
 
                 @Override
                 public boolean onLongClick(View v) {
-                    EUExImage.onImageLongClick();
+                    mEUExImage.onImageLongClick();
                     return false;
                 }
             });
@@ -409,13 +408,20 @@ public class ImagePreviewActivity extends RelativeLayout {
                             .removeMessages(Constants.WHAT_SHOW_IV_TO_GRID);
                 }
                 // setResult(RESULT_OK, null);
-                // finish();
+                finish();
                 break;
             default:
                 break;
             }
         }
     };
+
+    private void finish() {
+        if (mEUExImage != null) {
+            mEUExImage.removeViewFromCurWindow(TAG);
+        }
+    }
+
     private void toogleView() {
         if (rlTitle.getVisibility() == View.VISIBLE) {
             rlTitle.setVisibility(View.INVISIBLE);
@@ -441,9 +447,6 @@ public class ImagePreviewActivity extends RelativeLayout {
         fadeOutAnim.setDuration(duration);
         fadeOutAnim.setInterpolator(interpolator);
     }
-
-
-
 
     private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
         @Override

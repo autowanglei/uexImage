@@ -21,6 +21,9 @@ package org.zywx.wbpalmstar.plugin.ueximage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,6 +39,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
 import org.zywx.wbpalmstar.plugin.ueximage.util.DataParser;
 import org.zywx.wbpalmstar.plugin.ueximage.util.EUEXImageConfig;
 import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
+import org.zywx.wbpalmstar.plugin.ueximage.vo.ViewFrameVO;
 
 import android.app.Activity;
 import android.content.Context;
@@ -76,8 +80,8 @@ public class EUExImage extends EUExBase {
     private final String SAME_FILE_IN_DCIM = "系统相册中存在同名文件";
     private final String JSON_FORMAT_ERROR = "json格式错误";
     private final String NOT_SUPPORT_CROP = "你的设备不支持剪切功能！";
-    private static EUExImage mEuExImage = null;
-
+    /** * 保存添加到网页的view */
+    private static Map<String, View> addToWebViewsMap = new HashMap<String, View>();
 
     public EUExImage(Context context, EBrowserView eBrowserView) {
         super(context, eBrowserView);
@@ -91,11 +95,6 @@ public class EUExImage extends EUExBase {
         CommonUtil.initImageLoader(context);
         uexImageUtil = UEXImageUtil.getInstance();
         finder = ResoureFinder.getInstance(context);
-        if(null == mEuExImage)
-        {
-            mEuExImage = this;
-        }
-
     }
 
     @Override
@@ -221,36 +220,47 @@ public class EUExImage extends EUExBase {
                 config.setUIStyle(jsonObject.optInt(Constants.UI_STYLE));
             }
 
-            if (jsonObject.has(Constants.VIEW_FRAME_VO)) {
-                config.setViewFrameVO(DataParser.viewFrameVOParser(
-                        jsonObject.optInt(Constants.VIEW_FRAME_VO)));
-            }
+            ViewFrameVO viewFrameVO = getViewFrameVO(jsonObject);
+            config.setViewFrameVO(viewFrameVO);
 
             config.setIsOpenBrowser(true);
             Intent intent;
             View imagePreviewView = null;
-            WindowManager manager = ((Activity) mContext).getWindowManager();
-            DisplayMetrics outMetrics = new DisplayMetrics();
-            manager.getDefaultDisplay().getMetrics(outMetrics);
-            int width = outMetrics.widthPixels;
-            int height = outMetrics.heightPixels - 45;
 
             if (config.isStartOnGrid()) {
                 intent = new Intent(context, PictureGridActivity.class);
                 startActivityForResult(intent, REQUEST_IMAGE_BROWSER);
             } else {
-                imagePreviewView = new ImagePreviewActivity(context, "", 1);
+                imagePreviewView = new ImagePreviewActivity(context, this, "", 1);
                 RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-                        width, height);
-                lp.leftMargin = 0;
-                lp.topMargin = 0;
-                addViewToCurrentWindow(imagePreviewView, lp);
-//                intent = new Intent(context, ImagePreviewActivity.class);
+                        viewFrameVO.width, viewFrameVO.height);
+                lp.leftMargin = viewFrameVO.x;
+                lp.topMargin = viewFrameVO.y;
+                addViewToWebView(imagePreviewView, lp, ImagePreviewActivity.TAG);
             }
         } catch (JSONException e) {
             e.printStackTrace();
             Toast.makeText(context, "JSON解析错误", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private ViewFrameVO getViewFrameVO(JSONObject jsonObject) {
+        ViewFrameVO viewFrameVO = null;
+        if (jsonObject.has(Constants.VIEW_FRAME_VO)) {
+            viewFrameVO = DataParser.viewFrameVOParser(
+                    jsonObject.optString(Constants.VIEW_FRAME_VO));
+        }
+        if (null == viewFrameVO) {
+            WindowManager manager = ((Activity) mContext).getWindowManager();
+            DisplayMetrics outMetrics = new DisplayMetrics();
+            manager.getDefaultDisplay().getMetrics(outMetrics);
+            viewFrameVO = new ViewFrameVO();
+            viewFrameVO.x = 0;
+            viewFrameVO.y = 0;
+            viewFrameVO.width = outMetrics.widthPixels;
+            viewFrameVO.height = outMetrics.heightPixels - 45;
+        }
+        return viewFrameVO;
     }
 
     public void openCropper(String[] params) {
@@ -359,6 +369,33 @@ public class EUExImage extends EUExBase {
                         Log.i("ExternalStorage", "-> uri=" + uri);
                     }
                 });
+    }
+
+    public void addViewToWebView(View view, RelativeLayout.LayoutParams lp,
+            String tag) {
+        if (addToWebViewsMap.get(tag) != null) {
+            addToWebViewsMap.remove(tag);
+        }
+        addViewToCurrentWindow(view, lp);
+        addToWebViewsMap.put(tag, view);
+    }
+
+    public void removeViewFromCurWindow(String viewTag) {
+        View removeView = addToWebViewsMap.get(viewTag);
+        if (removeView != null) {
+            removeViewFromCurrentWindow(removeView);
+            removeView.destroyDrawingCache();
+            addToWebViewsMap.remove(viewTag);
+        }
+    }
+
+    public void onActivityResume(Context context) {
+        Set<String> tagList = addToWebViewsMap.keySet();
+        for (String tag : tagList) {
+            if (!TextUtils.isEmpty(tag)) {
+                ((ImageBaseView) addToWebViewsMap.get(tag)).onResume();
+            }
+        }
     }
 
     @Override
@@ -522,8 +559,8 @@ public class EUExImage extends EUExBase {
         callBackPluginJs(JsConst.CALLBACK_CLEAR_OUTPUT_IMAGES, jsonResult.toString());
     }
 
-    public static void onImageLongClick() {
-        mEuExImage.callBackPluginJs(JsConst.CALLBACK_ON_IAMGE_LONG_CLICKED, "");
+    public void onImageLongClick() {
+        callBackPluginJs(JsConst.CALLBACK_ON_IAMGE_LONG_CLICKED, "");
     }
 
     private void callBackPluginJs(String methodName, String jsonData){

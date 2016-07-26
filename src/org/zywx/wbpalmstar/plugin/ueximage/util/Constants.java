@@ -36,7 +36,7 @@ public class Constants {
     public static final int WHAT_SHOW_IV_TO_GRID = 1;
     public static final int HIDE_IV_TO_GRID_TIMEOUT = 3000;
     public static final int SHOW_IV_TO_GRID_TIMEOUT = 500;
-    /**UI相关*/
+    /** 位置、大小 */
     public static final String VIEW_FRAME_VO = "viewFrameConfig";
     public static final String VIEW_FRAME_VO_X = "x";
     public static final String VIEW_FRAME_VO_Y = "y";
