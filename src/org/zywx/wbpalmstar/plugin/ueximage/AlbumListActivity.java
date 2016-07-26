@@ -18,6 +18,23 @@
  */
 package org.zywx.wbpalmstar.plugin.ueximage;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import org.zywx.wbpalmstar.base.ResoureFinder;
+import org.zywx.wbpalmstar.plugin.ueximage.model.PictureFolder;
+import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
+import org.zywx.wbpalmstar.plugin.ueximage.util.EUEXImageConfig;
+import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
+
+import com.ace.universalimageloader.core.DisplayImageOptions;
+import com.ace.universalimageloader.core.ImageLoader;
+import com.ace.universalimageloader.core.display.SimpleBitmapDisplayer;
+import com.ace.universalimageloader.core.imageaware.ImageAware;
+import com.ace.universalimageloader.core.imageaware.ImageViewAware;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -35,23 +52,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.ace.universalimageloader.core.DisplayImageOptions;
-import com.ace.universalimageloader.core.ImageLoader;
-import com.ace.universalimageloader.core.display.SimpleBitmapDisplayer;
-import com.ace.universalimageloader.core.imageaware.ImageAware;
-import com.ace.universalimageloader.core.imageaware.ImageViewAware;
-
-import org.zywx.wbpalmstar.base.ResoureFinder;
-import org.zywx.wbpalmstar.plugin.ueximage.model.PictureFolder;
-import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
-import org.zywx.wbpalmstar.plugin.ueximage.util.EUEXImageConfig;
-import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
-
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 public class AlbumListActivity extends Activity implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -91,7 +91,8 @@ public class AlbumListActivity extends Activity implements Serializable {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(AlbumListActivity.this, PictureGridActivity.class);
                 intent.putExtra(Constants.EXTRA_FOLDER_PATH, pictureFolders.get(i).getFolderPath());
-                startActivityForResult(intent, EUExImage.REQUEST_IMAGE_PICKER);
+                        startActivityForResult(intent,
+                                Constants.REQUEST_IMAGE_PICKER);
             }
         });
     }
@@ -99,7 +100,8 @@ public class AlbumListActivity extends Activity implements Serializable {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == EUExImage.REQUEST_IMAGE_PICKER && resultCode == RESULT_OK) {
+        if (requestCode == Constants.REQUEST_IMAGE_PICKER
+                && resultCode == RESULT_OK) {
             setResult(resultCode, null);
             finish();
         }

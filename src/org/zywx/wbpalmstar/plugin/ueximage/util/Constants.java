@@ -42,4 +42,17 @@ public class Constants {
     public static final String VIEW_FRAME_VO_Y = "y";
     public static final String VIEW_FRAME_VO_W = "w";
     public static final String VIEW_FRAME_VO_H = "h";
+
+    /** 原EUExImage类中的常量 */
+    /** 裁剪图片 */
+    public static final int REQUEST_CROP_IMAGE = 100;
+    /** 选择图片 */
+    public static final int REQUEST_IMAGE_PICKER = 101;
+    /** 浏览图片 */
+    public static final int REQUEST_IMAGE_BROWSER = 102;
+
+    /** 原Crop类中的常量 */
+    public static final int REQUEST_CROP = 6709;
+    public static final int REQUEST_PICK = 9162;
+    public static final int RESULT_ERROR = 404;
 }

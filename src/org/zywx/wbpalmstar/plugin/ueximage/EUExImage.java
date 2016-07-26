@@ -30,7 +30,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.zywx.wbpalmstar.base.BDebug;
 import org.zywx.wbpalmstar.base.BUtility;
-import org.zywx.wbpalmstar.base.ResoureFinder;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.plugin.ueximage.crop.Crop;
@@ -63,19 +62,10 @@ public class EUExImage extends EUExBase {
     private boolean cropUsePng = false;
     //当前Android只支持方型裁剪
     private int cropMode = 1;
-
     private File cropOutput = null;
-
-    //裁剪操作的状态，1 代表成功， 2 代表失败，3代表用户取消。
-    private int cropStatus = 1;
-
-    public static final int REQUEST_CROP_IMAGE = 100;
-    public static final int REQUEST_IMAGE_PICKER = 101;
-    public static final int REQUEST_IMAGE_BROWSER = 102;
     private Context context;
     private UEXImageUtil uexImageUtil;
-
-    private ResoureFinder finder;
+    // private ResoureFinder finder;
     private final String FILE_SYSTEM_ERROR = "文件系统操作出错";
     private final String SAME_FILE_IN_DCIM = "系统相册中存在同名文件";
     private final String JSON_FORMAT_ERROR = "json格式错误";
@@ -94,7 +84,7 @@ public class EUExImage extends EUExBase {
         }
         CommonUtil.initImageLoader(context);
         uexImageUtil = UEXImageUtil.getInstance();
-        finder = ResoureFinder.getInstance(context);
+        // finder = ResoureFinder.getInstance(context);
     }
 
     @Override
@@ -134,7 +124,7 @@ public class EUExImage extends EUExBase {
             }
             EUEXImageConfig.getInstance().setIsOpenBrowser(false);
             Intent intent = new Intent(context, AlbumListActivity.class);
-            startActivityForResult(intent, REQUEST_IMAGE_PICKER);
+            startActivityForResult(intent, Constants.REQUEST_IMAGE_PICKER);
 
         } catch (JSONException e) {
             if (BDebug.DEBUG) {
@@ -229,14 +219,15 @@ public class EUExImage extends EUExBase {
 
             if (config.isStartOnGrid()) {
                 intent = new Intent(context, PictureGridActivity.class);
-                startActivityForResult(intent, REQUEST_IMAGE_BROWSER);
+                startActivityForResult(intent, Constants.REQUEST_IMAGE_BROWSER);
             } else {
-                imagePreviewView = new ImagePreviewActivity(context, this, "", 1);
+                imagePreviewView = new ImagePreviewView(context, this, "",
+                        0, Constants.REQUEST_IMAGE_BROWSER);
                 RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                         viewFrameVO.width, viewFrameVO.height);
                 lp.leftMargin = viewFrameVO.x;
                 lp.topMargin = viewFrameVO.y;
-                addViewToWebView(imagePreviewView, lp, ImagePreviewActivity.TAG);
+                addViewToWebView(imagePreviewView, lp, ImagePreviewView.TAG);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -380,7 +371,22 @@ public class EUExImage extends EUExBase {
         addToWebViewsMap.put(tag, view);
     }
 
-    public void removeViewFromCurWindow(String viewTag) {
+    public void closeImagePreview(int requestCode) {
+        removeViewFromCurWindow(ImagePreviewView.TAG);
+        switch(requestCode)
+        {
+        case Constants.REQUEST_IMAGE_PICKER:
+            break;
+        case Constants.REQUEST_IMAGE_BROWSER:
+            callBackPluginJs(JsConst.CALLBACK_ON_BROWSER_CLOSED,
+                    "pic browser closed");
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void removeViewFromCurWindow(String viewTag) {
         View removeView = addToWebViewsMap.get(viewTag);
         if (removeView != null) {
             removeViewFromCurrentWindow(removeView);
@@ -402,11 +408,11 @@ public class EUExImage extends EUExBase {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //裁剪图片
-        if (requestCode == Crop.REQUEST_CROP) {
+        if (requestCode == Constants.REQUEST_CROP) {
             cropCallBack(resultCode);
         }
         //选择图片
-        if (requestCode == REQUEST_IMAGE_PICKER) {
+        if (requestCode == Constants.REQUEST_IMAGE_PICKER) {
             if (resultCode == Activity.RESULT_OK) {
                 JSONObject jsonObject= uexImageUtil.getChoosedPicInfo(context);
                 callBackPluginJs(JsConst.CALLBACK_ON_PICKER_CLOSED, jsonObject.toString());
@@ -422,7 +428,7 @@ public class EUExImage extends EUExBase {
             uexImageUtil.resetData();
         }
         //浏览图片
-        if (requestCode == REQUEST_IMAGE_BROWSER) {
+        if (requestCode == Constants.REQUEST_IMAGE_BROWSER) {
             callBackPluginJs(JsConst.CALLBACK_ON_BROWSER_CLOSED, "pic browser closed");
         }
     }

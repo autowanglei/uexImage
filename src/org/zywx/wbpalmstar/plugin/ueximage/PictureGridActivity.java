@@ -18,6 +18,28 @@
  */
 package org.zywx.wbpalmstar.plugin.ueximage;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.zywx.wbpalmstar.base.ResoureFinder;
+import org.zywx.wbpalmstar.plugin.ueximage.model.PictureInfo;
+import org.zywx.wbpalmstar.plugin.ueximage.util.CommonUtil;
+import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
+import org.zywx.wbpalmstar.plugin.ueximage.util.EUEXImageConfig;
+import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
+
+import com.ace.universalimageloader.core.DisplayImageOptions;
+import com.ace.universalimageloader.core.ImageLoader;
+import com.ace.universalimageloader.core.assist.ImageScaleType;
+import com.ace.universalimageloader.core.display.SimpleBitmapDisplayer;
+import com.ace.universalimageloader.core.imageaware.ImageAware;
+import com.ace.universalimageloader.core.imageaware.ImageViewAware;
+import com.ace.universalimageloader.core.listener.PauseOnScrollListener;
+import com.ace.universalimageloader.core.listener.SimpleImageLoadingListener;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -26,7 +48,6 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,28 +59,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.ace.universalimageloader.core.DisplayImageOptions;
-import com.ace.universalimageloader.core.ImageLoader;
-import com.ace.universalimageloader.core.assist.ImageScaleType;
-import com.ace.universalimageloader.core.display.SimpleBitmapDisplayer;
-import com.ace.universalimageloader.core.imageaware.ImageAware;
-import com.ace.universalimageloader.core.imageaware.ImageViewAware;
-import com.ace.universalimageloader.core.listener.PauseOnScrollListener;
-import com.ace.universalimageloader.core.listener.SimpleImageLoadingListener;
-
-import org.json.JSONArray;
-import org.zywx.wbpalmstar.base.ResoureFinder;
-import org.zywx.wbpalmstar.plugin.ueximage.model.PictureInfo;
-import org.zywx.wbpalmstar.plugin.ueximage.util.CommonUtil;
-import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
-import org.zywx.wbpalmstar.plugin.ueximage.util.EUEXImageConfig;
-import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
-
-import java.io.File;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 //以九宫格的形式显示某个文件夹下的图片列表
 public class PictureGridActivity extends Activity {
@@ -277,14 +276,15 @@ public class PictureGridActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == EUExImage.REQUEST_IMAGE_PICKER && resultCode == RESULT_OK) {
+        if (requestCode == Constants.REQUEST_IMAGE_PICKER
+                && resultCode == RESULT_OK) {
             setResult(resultCode, null);
             finish();
         }
     }
 
     private void picPreview (int position) {
-        Intent intent = new Intent(PictureGridActivity.this, ImagePreviewActivity.class);
+        Intent intent = new Intent(PictureGridActivity.this, ImagePreviewView.class);
         intent.putExtra(Constants.EXTRA_FOLDER_NAME, folderName);
         if(isOpenBrowser) {
             EUEXImageConfig.getInstance().setStartIndex(position);
@@ -292,7 +292,7 @@ public class PictureGridActivity extends Activity {
             finish();
         } else {
             intent.putExtra(Constants.EXTRA_PIC_INDEX, position);
-            startActivityForResult(intent, EUExImage.REQUEST_IMAGE_PICKER);
+            startActivityForResult(intent, Constants.REQUEST_IMAGE_PICKER);
         }
     }
     private CheckBox.OnCheckedChangeListener onCheckedChangeListener = new CheckBox.OnCheckedChangeListener(){

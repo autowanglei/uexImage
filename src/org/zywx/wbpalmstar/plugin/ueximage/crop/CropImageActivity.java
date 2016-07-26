@@ -16,6 +16,14 @@
 
 package org.zywx.wbpalmstar.plugin.ueximage.crop;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.concurrent.CountDownLatch;
+
+import org.zywx.wbpalmstar.base.ResoureFinder;
+import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
+
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -33,13 +41,6 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-
-import org.zywx.wbpalmstar.base.ResoureFinder;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.concurrent.CountDownLatch;
 
 /*
  * Modified from original in AOSP.
@@ -448,7 +449,8 @@ public class CropImageActivity extends MonitoredActivity {
     }
 
     private void setResultException(Throwable throwable) {
-        setResult(Crop.RESULT_ERROR, new Intent().putExtra(Crop.Extra.ERROR, throwable));
+        setResult(Constants.RESULT_ERROR,
+                new Intent().putExtra(Crop.Extra.ERROR, throwable));
     }
 
 }
