@@ -221,13 +221,13 @@ public class EUExImage extends EUExBase {
                 intent = new Intent(context, PictureGridActivity.class);
                 startActivityForResult(intent, Constants.REQUEST_IMAGE_BROWSER);
             } else {
-                imagePreviewView = new ImagePreviewView(context, this, "",
+                imagePreviewView = new ImagePreviewActivity(context, this, "",
                         0, Constants.REQUEST_IMAGE_BROWSER);
                 RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                         viewFrameVO.width, viewFrameVO.height);
                 lp.leftMargin = viewFrameVO.x;
                 lp.topMargin = viewFrameVO.y;
-                addViewToWebView(imagePreviewView, lp, ImagePreviewView.TAG);
+                addViewToWebView(imagePreviewView, lp, ImagePreviewActivity.TAG);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -371,21 +371,6 @@ public class EUExImage extends EUExBase {
         addToWebViewsMap.put(tag, view);
     }
 
-    public void closeImagePreview(int requestCode) {
-        removeViewFromCurWindow(ImagePreviewView.TAG);
-        switch(requestCode)
-        {
-        case Constants.REQUEST_IMAGE_PICKER:
-            break;
-        case Constants.REQUEST_IMAGE_BROWSER:
-            callBackPluginJs(JsConst.CALLBACK_ON_BROWSER_CLOSED,
-                    "pic browser closed");
-            break;
-        default:
-            break;
-        }
-    }
-
     private void removeViewFromCurWindow(String viewTag) {
         View removeView = addToWebViewsMap.get(viewTag);
         if (removeView != null) {
@@ -401,6 +386,31 @@ public class EUExImage extends EUExBase {
             if (!TextUtils.isEmpty(tag)) {
                 ((ImageBaseView) addToWebViewsMap.get(tag)).onResume();
             }
+        }
+    }
+
+    public void closeImagePreview(int requestCode, int resultCode) {
+        removeViewFromCurWindow(ImagePreviewActivity.TAG);
+        switch (requestCode) {
+        case Constants.REQUEST_IMAGE_PICKER:
+            switch (resultCode) {
+            case Activity.RESULT_OK:
+
+                break;
+            case Constants.OPERATION_CANCELLED:
+
+                break;
+
+            default:
+                break;
+            }
+            break;
+        case Constants.REQUEST_IMAGE_BROWSER:
+            callBackPluginJs(JsConst.CALLBACK_ON_BROWSER_CLOSED,
+                    "pic browser closed");
+            break;
+        default:
+            break;
         }
     }
 

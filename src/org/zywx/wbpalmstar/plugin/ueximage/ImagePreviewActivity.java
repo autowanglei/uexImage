@@ -33,6 +33,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
 import com.ace.universalimageloader.core.DisplayImageOptions;
 import com.ace.universalimageloader.core.ImageLoader;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -56,7 +57,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ImagePreviewView extends ImageBaseView {
+public class ImagePreviewActivity extends ImageBaseView {
 
     public final static String TAG = "ImagePreviewView";
     private ViewPager viewPager;
@@ -104,18 +105,20 @@ public class ImagePreviewView extends ImageBaseView {
      * @param context
      * @param mEUExImage
      * @param folderName
+     *            isOpenBrowser为false时，才使用此值
      * @param picIndex
+     *            isOpenBrowser为false时，才使用此值
      * @param requestCode
      *            this code will be returned in finish() when the view exits.
      */
-    public ImagePreviewView(Context context, EUExImage mEUExImage,
+    public ImagePreviewActivity(Context context, EUExImage mEUExImage,
             String folderName, int picIndex, int requestCode) {
         super(context, mEUExImage, requestCode);
         mContext = context;
-        initView(context, folderName, picIndex);
+        onCreate(context, folderName, picIndex);
     }
 
-    private void initView(Context context, String folderName, int picIndex) {
+    private void onCreate(Context context, String folderName, int picIndex) {
         LayoutInflater.from(context)
                 .inflate(
                         EUExUtil.getResLayoutID(
@@ -166,7 +169,7 @@ public class ImagePreviewView extends ImageBaseView {
         ivGoBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                finish(Activity.RESULT_CANCELED);
             }
         });
         viewPager.setAdapter(adapter);
@@ -185,7 +188,7 @@ public class ImagePreviewView extends ImageBaseView {
                 if (checkedItems.size() >= EUEXImageConfig.getInstance()
                         .getMinImageCount()) {
                     // setResult(RESULT_OK, null);
-                    finish();
+                    finish(Activity.RESULT_OK);
                 } else {
                     String str = String.format(
                             EUExUtil.getString(
@@ -217,10 +220,10 @@ public class ImagePreviewView extends ImageBaseView {
     }
 
     private void startPictureGridActivity() {
-        // Intent intent = new Intent(ImagePreviewActivity.this,
-        // PictureGridActivity.class);
-        // startActivity(intent);
-        finish();
+        Intent intent = new Intent(ImagePreviewActivity.this,
+                PictureGridActivity.class);
+        startActivity(intent);
+        finish(Activity.RESULT_CANCELED);
     }
 
     private void initViewForBrowser(final Context context) {
@@ -249,7 +252,7 @@ public class ImagePreviewView extends ImageBaseView {
                 @Override
                 public void onClick(View v) {
                     // setResult(RESULT_OK, null);
-                    finish();
+                    finish(Activity.RESULT_OK);
                 }
             });
             if (EUEXImageConfig.getInstance().isDisplayActionButton()) {
@@ -420,7 +423,7 @@ public class ImagePreviewView extends ImageBaseView {
                             .removeMessages(Constants.WHAT_SHOW_IV_TO_GRID);
                 }
                 // setResult(RESULT_OK, null);
-                finish();
+                finish(Activity.RESULT_OK);
                 break;
             default:
                 break;
@@ -428,9 +431,15 @@ public class ImagePreviewView extends ImageBaseView {
         }
     };
 
-    private void finish() {
+    /**
+     * @param resultCode
+     *            原来只有Activity.RESULT_OK,如不通过Activity.setResult设置resultCode，
+     *            resultCode默认为Activity.RESULT_CANCELED，故原来未setResult的，
+     *            添加默认值Activity.RESULT_CANCELED。
+     */
+    private void finish(int resultCode) {
         if (mEUExImage != null) {
-            mEUExImage.closeImagePreview(mRequestCode);
+            mEUExImage.closeImagePreview(mRequestCode, resultCode);
         }
     }
 

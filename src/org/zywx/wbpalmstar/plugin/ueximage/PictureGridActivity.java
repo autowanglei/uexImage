@@ -24,7 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.zywx.wbpalmstar.base.ResoureFinder;
+import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.model.PictureInfo;
 import org.zywx.wbpalmstar.plugin.ueximage.util.CommonUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
@@ -40,13 +40,11 @@ import com.ace.universalimageloader.core.imageaware.ImageViewAware;
 import com.ace.universalimageloader.core.listener.PauseOnScrollListener;
 import com.ace.universalimageloader.core.listener.SimpleImageLoadingListener;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,10 +59,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 //以九宫格的形式显示某个文件夹下的图片列表
-public class PictureGridActivity extends Activity {
+public class PictureGridActivity extends ImageBaseView {
     private final String TAG = "PictureGridActivity";
-    /*当打开系统图库时folderName才会有值，如果是打开图片选择器，此处图片信息将完全从系统中读。并且用户可以做选择图片的操作。
-    如果是执行打开浏览器操作，则不会有值
+    /*
+     * 当打开系统图库时folderName才会有值，如果是打开图片选择器，此处图片信息将完全从系统中读。并且用户可以做选择图片的操作。
+     * 如果是执行打开浏览器操作，则不会有值
      */
     private String folderPath;
     private String folderName;
@@ -74,56 +73,65 @@ public class PictureGridActivity extends Activity {
     private TextView tvTitle;
     private UEXImageUtil uexImageUtil;
     private Button btnFinishInTitle;
-    private List <PictureInfo> picList;
+    private List<PictureInfo> picList;
     private List<String> checkedItems;
     private MyAdapter adapter;
 
     private boolean isOpenBrowser = false;
-    private ResoureFinder finder;
 
+    public PictureGridActivity(Context context, EUExImage eUExImage,
+            String folderName, int requestCode) {
+        super(context, eUExImage, requestCode);
+        onCreate(context, folderName);
+    }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        finder = ResoureFinder.getInstance(this);
-        setContentView(finder.getLayoutId("plugin_uex_image_activity_picture_grid"));
+    private void onCreate(Context context, String folderName) {
+        LayoutInflater.from(context)
+                .inflate(
+                        EUExUtil.getResLayoutID(
+                                "plugin_uex_image_activity_picture_grid"),
+                        this, true);
 
         uexImageUtil = UEXImageUtil.getInstance();
-        folderPath = getIntent().getStringExtra(Constants.EXTRA_FOLDER_PATH);
-        //执行浏览操作
-        if(TextUtils.isEmpty(folderPath)) {
+        folderPath = folderName;
+        // 执行浏览操作
+        if (TextUtils.isEmpty(folderPath)) {
             isOpenBrowser = true;
-            JSONArray imageDataArray  = EUEXImageConfig.getInstance().getDataArray();
+            JSONArray imageDataArray = EUEXImageConfig.getInstance()
+                    .getDataArray();
             picList = uexImageUtil.transformData(imageDataArray);
-        } else { //执行选择操作
+        } else { // 执行选择操作
             folderName = new File(folderPath).getName();
-            picList = CommonUtil.getPictureInfo(this, folderPath);
+            picList = CommonUtil.getPictureInfo(mContext, folderPath);
             uexImageUtil.setCurrentPicList(picList);
         }
         uexImageUtil.setCurrentPicList(picList);
 
-        ivGoBack = (ImageView) findViewById(finder.getId("iv_left_on_title"));
-        tvTitle = (TextView) findViewById(finder.getId("tv_title"));
-        btnFinishInTitle = (Button) findViewById(finder.getId("btn_finish_title"));
-        gvPictures = (GridView) findViewById(finder.getId("gv_pictures"));
-        //拖动下拉条和滑动过程中暂停加载
-        gvPictures.setOnScrollListener(new PauseOnScrollListener(ImageLoader.getInstance(), true, true));
-        if(isOpenBrowser) {
+        ivGoBack = (ImageView) findViewById(
+                EUExUtil.getResIdID("iv_left_on_title"));
+        tvTitle = (TextView) findViewById(EUExUtil.getResIdID("tv_title"));
+        btnFinishInTitle = (Button) findViewById(
+                EUExUtil.getResIdID("btn_finish_title"));
+        gvPictures = (GridView) findViewById(
+                EUExUtil.getResIdID("gv_pictures"));
+        // 拖动下拉条和滑动过程中暂停加载
+        gvPictures.setOnScrollListener(new PauseOnScrollListener(
+                ImageLoader.getInstance(), true, true));
+        if (isOpenBrowser) {
             initViewForBrowser();
         } else {
-            initViewForPicker();
+            initViewForPicker(context);
         }
     }
 
-
-
-    private void initViewForPicker() {
+    private void initViewForPicker(final Context context) {
         tvTitle.setText(folderName);
-        adapter = new MyAdapter(this, picList);
+        adapter = new MyAdapter(mContext, picList);
         gvPictures.setAdapter(adapter);
         checkedItems = uexImageUtil.getCheckedItems();
         if (checkedItems.size() > 0) {
-            btnFinishInTitle.setText("完成(" + checkedItems.size() + "/" +  EUEXImageConfig.getInstance().getMaxImageCount() + ")");
+            btnFinishInTitle.setText("完成(" + checkedItems.size() + "/"
+                    + EUEXImageConfig.getInstance().getMaxImageCount() + ")");
             btnFinishInTitle.setEnabled(true);
         }
         ivGoBack.setOnClickListener(new View.OnClickListener() {
@@ -135,17 +143,23 @@ public class PictureGridActivity extends Activity {
         btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checkedItems.size() >=  EUEXImageConfig.getInstance().getMinImageCount()) {
+                if (checkedItems.size() >= EUEXImageConfig.getInstance()
+                        .getMinImageCount()) {
                     setResult(RESULT_OK, new Intent());
                     finish();
                 } else {
-                    String str = String.format(finder.getString("plugin_uex_image_at_least_choose"),  EUEXImageConfig.getInstance().getMinImageCount());
-                    Toast.makeText(PictureGridActivity.this, str, Toast.LENGTH_SHORT).show();
+                    String str = String.format(
+                            EUExUtil.getString(
+                                    "plugin_uex_image_at_least_choose"),
+                            EUEXImageConfig.getInstance().getMinImageCount());
+                    Toast.makeText(context, str,
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
-    private void initViewForBrowser()  {
+
+    private void initViewForBrowser() {
         ivGoBack.setVisibility(View.INVISIBLE);
         adapter = new MyAdapter(this, picList);
         gvPictures.setAdapter(adapter);
@@ -170,30 +184,32 @@ public class PictureGridActivity extends Activity {
 
         public MyAdapter(Context context, List<PictureInfo> paths) {
             this.paths = paths;
-            options = new DisplayImageOptions.Builder()
-                    .cacheInMemory(true)
+            options = new DisplayImageOptions.Builder().cacheInMemory(true)
                     .cacheOnDisk(false)
-                    .showImageForEmptyUri(finder.getDrawableId("plugin_uex_image_loading"))
-                    .showImageOnFail(finder.getDrawableId("plugin_uex_image_loading"))
-                    .showImageOnLoading(finder.getDrawableId("plugin_uex_image_loading"))
+                    .showImageForEmptyUri(
+                            finder.getDrawableId("plugin_uex_image_loading"))
+                    .showImageOnFail(
+                            finder.getDrawableId("plugin_uex_image_loading"))
+                    .showImageOnLoading(
+                            finder.getDrawableId("plugin_uex_image_loading"))
                     .bitmapConfig(Bitmap.Config.RGB_565)
                     .imageScaleType(ImageScaleType.EXACTLY)
                     .displayer(new SimpleBitmapDisplayer())
-                    .considerExifParams(true)//考虑Exif旋转
+                    .considerExifParams(true)// 考虑Exif旋转
                     .build();
             Collections.sort(paths, new Comparator<PictureInfo>() {
-				@Override
-				public int compare(PictureInfo lhs, PictureInfo rhs) {
-					if (lhs.getLastModified() < rhs.getLastModified()) {
-						return 1;
-					} else if (lhs.getLastModified() == rhs.getLastModified()) {
-						return 0;
-					} else if (lhs.getLastModified() > rhs.getLastModified()) {
-						return -1;
-					}
-					return 0;
-				}
-			});
+                @Override
+                public int compare(PictureInfo lhs, PictureInfo rhs) {
+                    if (lhs.getLastModified() < rhs.getLastModified()) {
+                        return 1;
+                    } else if (lhs.getLastModified() == rhs.getLastModified()) {
+                        return 0;
+                    } else if (lhs.getLastModified() > rhs.getLastModified()) {
+                        return -1;
+                    }
+                    return 0;
+                }
+            });
         }
 
         @Override
@@ -212,20 +228,28 @@ public class PictureGridActivity extends Activity {
         }
 
         @Override
-        public View getView(final int i, View convertView, ViewGroup viewGroup) {
+        public View getView(final int i, View convertView,
+                ViewGroup viewGroup) {
             ViewHolder viewHolder;
 
             if (convertView == null || convertView.getTag() == null) {
                 viewHolder = new ViewHolder();
                 LayoutInflater inflater = getLayoutInflater();
-                convertView = inflater.inflate(finder.getLayoutId("plugin_uex_image_item_grid_picture"), null);
-                viewHolder.imageView = (ImageView) convertView.findViewById(finder.getId("iv_item"));
-                viewHolder.checkBox = (CheckBox) convertView.findViewById(finder.getId("checkbox"));
-                //如果是浏览图片，则没有选择的checkbox
-                if(isOpenBrowser) {
+                convertView = inflater
+                        .inflate(
+                                finder.getLayoutId(
+                                        "plugin_uex_image_item_grid_picture"),
+                                null);
+                viewHolder.imageView = (ImageView) convertView
+                        .findViewById(EUExUtil.getResIdID("iv_item"));
+                viewHolder.checkBox = (CheckBox) convertView
+                        .findViewById(EUExUtil.getResIdID("checkbox"));
+                // 如果是浏览图片，则没有选择的checkbox
+                if (isOpenBrowser) {
                     viewHolder.checkBox.setVisibility(View.INVISIBLE);
                 } else {
-                    viewHolder.checkBox.setOnCheckedChangeListener(onCheckedChangeListener);
+                    viewHolder.checkBox.setOnCheckedChangeListener(
+                            onCheckedChangeListener);
                 }
 
                 convertView.setTag(viewHolder);
@@ -237,22 +261,26 @@ public class PictureGridActivity extends Activity {
 
             final ViewHolder tempViewHolder = viewHolder;
             if (!isOpenBrowser) {
-                ImageAware imageAware = new ImageViewAware(viewHolder.imageView, false);
-                ImageLoader.getInstance().displayImage(pictureInfo.getSrc(), imageAware, options,
-                        loadingListener, null);
+                ImageAware imageAware = new ImageViewAware(viewHolder.imageView,
+                        false);
+                ImageLoader.getInstance().displayImage(pictureInfo.getSrc(),
+                        imageAware, options, loadingListener, null);
                 viewHolder.checkBox.setTag(pictureInfo.getSrc());
-                viewHolder.checkBox.setChecked(checkedItems.contains(pictureInfo.getSrc()));
-            } else {//浏览图片：对于传入的图片的加载
+                viewHolder.checkBox.setChecked(
+                        checkedItems.contains(pictureInfo.getSrc()));
+            } else {// 浏览图片：对于传入的图片的加载
                 String url = pictureInfo.getSrc();
                 if (pictureInfo.getThumb() != null) {
                     url = pictureInfo.getThumb();
                 }
-                if (url.substring(0,4).equalsIgnoreCase(Constants.HTTP)) {
-                    ImageAware imageAware = new ImageViewAware(viewHolder.imageView, false);
-                    ImageLoader.getInstance().displayImage(url, imageAware, options,
-                            null, null);
+                if (url.substring(0, 4).equalsIgnoreCase(Constants.HTTP)) {
+                    ImageAware imageAware = new ImageViewAware(
+                            viewHolder.imageView, false);
+                    ImageLoader.getInstance().displayImage(url, imageAware,
+                            options, null, null);
                 } else {
-                    Bitmap bitmap= CommonUtil.getLocalImage(PictureGridActivity.this, url);
+                    Bitmap bitmap = CommonUtil
+                            .getLocalImage(PictureGridActivity.this, url);
                     imageView.setImageBitmap(bitmap);
                 }
             }
@@ -274,7 +302,8 @@ public class PictureGridActivity extends Activity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode,
+            Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.REQUEST_IMAGE_PICKER
                 && resultCode == RESULT_OK) {
@@ -283,10 +312,11 @@ public class PictureGridActivity extends Activity {
         }
     }
 
-    private void picPreview (int position) {
-        Intent intent = new Intent(PictureGridActivity.this, ImagePreviewView.class);
+    private void picPreview(int position) {
+        Intent intent = new Intent(PictureGridActivity.this,
+                ImagePreviewActivity.class);
         intent.putExtra(Constants.EXTRA_FOLDER_NAME, folderName);
-        if(isOpenBrowser) {
+        if (isOpenBrowser) {
             EUEXImageConfig.getInstance().setStartIndex(position);
             startActivity(intent);
             finish();
@@ -295,18 +325,24 @@ public class PictureGridActivity extends Activity {
             startActivityForResult(intent, Constants.REQUEST_IMAGE_PICKER);
         }
     }
-    private CheckBox.OnCheckedChangeListener onCheckedChangeListener = new CheckBox.OnCheckedChangeListener(){
+
+    private CheckBox.OnCheckedChangeListener onCheckedChangeListener = new CheckBox.OnCheckedChangeListener() {
 
         @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        public void onCheckedChanged(CompoundButton buttonView,
+                boolean isChecked) {
             if (!isChecked) {
                 if (checkedItems.contains(buttonView.getTag())) {
                     checkedItems.remove(buttonView.getTag());
                 }
             } else {
                 if (!checkedItems.contains(buttonView.getTag())) {
-                    if(checkedItems.size() >=  EUEXImageConfig.getInstance().getMaxImageCount()){
-                        Toast.makeText(PictureGridActivity.this, "最多选择" +  EUEXImageConfig.getInstance().getMaxImageCount() + "张图片", Toast.LENGTH_SHORT).show();
+                    if (checkedItems.size() >= EUEXImageConfig.getInstance()
+                            .getMaxImageCount()) {
+                        Toast.makeText(PictureGridActivity.this,
+                                "最多选择" + EUEXImageConfig.getInstance()
+                                        .getMaxImageCount() + "张图片",
+                                Toast.LENGTH_SHORT).show();
                         buttonView.setChecked(false);
                         return;
                     }
@@ -314,7 +350,9 @@ public class PictureGridActivity extends Activity {
                 }
             }
             if (checkedItems.size() > 0) {
-                btnFinishInTitle.setText("完成(" +checkedItems.size()+ "/"+  EUEXImageConfig.getInstance().getMaxImageCount() + ")");
+                btnFinishInTitle.setText("完成(" + checkedItems.size() + "/"
+                        + EUEXImageConfig.getInstance().getMaxImageCount()
+                        + ")");
                 btnFinishInTitle.setEnabled(true);
             } else {
                 btnFinishInTitle.setText("完成");
@@ -324,13 +362,16 @@ public class PictureGridActivity extends Activity {
     };
     SimpleImageLoadingListener loadingListener = new SimpleImageLoadingListener() {
         @Override
-        public void onLoadingComplete(String imageUri, View view, final Bitmap bm) {
+        public void onLoadingComplete(String imageUri, View view,
+                final Bitmap bm) {
             if (TextUtils.isEmpty(imageUri)) {
                 return;
             }
-            //此处加一个#eeeeee的滤镜，防止checkbox看不清
+            // 此处加一个#eeeeee的滤镜，防止checkbox看不清
             try {
-                ((ImageView) view).getDrawable().setColorFilter(Color.argb(0xff, 0xee, 0xee, 0xee), PorterDuff.Mode.MULTIPLY);
+                ((ImageView) view).getDrawable().setColorFilter(
+                        Color.argb(0xff, 0xee, 0xee, 0xee),
+                        PorterDuff.Mode.MULTIPLY);
             } catch (Exception e) {
                 e.printStackTrace();
             }
