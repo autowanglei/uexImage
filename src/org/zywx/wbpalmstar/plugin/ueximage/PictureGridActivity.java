@@ -40,8 +40,8 @@ import com.ace.universalimageloader.core.imageaware.ImageViewAware;
 import com.ace.universalimageloader.core.listener.PauseOnScrollListener;
 import com.ace.universalimageloader.core.listener.SimpleImageLoadingListener;
 
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -60,7 +60,7 @@ import android.widget.Toast;
 
 //以九宫格的形式显示某个文件夹下的图片列表
 public class PictureGridActivity extends ImageBaseView {
-    private final String TAG = "PictureGridActivity";
+    public static final String TAG = "PictureGridView";
     /*
      * 当打开系统图库时folderName才会有值，如果是打开图片选择器，此处图片信息将完全从系统中读。并且用户可以做选择图片的操作。
      * 如果是执行打开浏览器操作，则不会有值
@@ -91,7 +91,10 @@ public class PictureGridActivity extends ImageBaseView {
                         EUExUtil.getResLayoutID(
                                 "plugin_uex_image_activity_picture_grid"),
                         this, true);
-
+        View rootView = (View) findViewById(
+                EUExUtil.getResIdID("layout_grid_view"));
+        rootView.setBackgroundColor(
+                EUEXImageConfig.getInstance().getViewGridBackground());
         uexImageUtil = UEXImageUtil.getInstance();
         folderPath = folderName;
         // 执行浏览操作
@@ -118,7 +121,7 @@ public class PictureGridActivity extends ImageBaseView {
         gvPictures.setOnScrollListener(new PauseOnScrollListener(
                 ImageLoader.getInstance(), true, true));
         if (isOpenBrowser) {
-            initViewForBrowser();
+            initViewForBrowser(context);
         } else {
             initViewForPicker(context);
         }
@@ -137,7 +140,7 @@ public class PictureGridActivity extends ImageBaseView {
         ivGoBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                finish(TAG, Activity.RESULT_CANCELED);
             }
         });
         btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
@@ -145,53 +148,53 @@ public class PictureGridActivity extends ImageBaseView {
             public void onClick(View v) {
                 if (checkedItems.size() >= EUEXImageConfig.getInstance()
                         .getMinImageCount()) {
-                    setResult(RESULT_OK, new Intent());
-                    finish();
+                    // setResult(RESULT_OK, new Intent());
+                    finish(TAG, Activity.RESULT_OK);
                 } else {
                     String str = String.format(
                             EUExUtil.getString(
                                     "plugin_uex_image_at_least_choose"),
                             EUEXImageConfig.getInstance().getMinImageCount());
-                    Toast.makeText(context, str,
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
-    private void initViewForBrowser() {
+    private void initViewForBrowser(Context context) {
         ivGoBack.setVisibility(View.INVISIBLE);
-        adapter = new MyAdapter(this, picList);
+        adapter = new MyAdapter(context, picList);
         gvPictures.setAdapter(adapter);
         btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setResult(RESULT_OK, null);
-                finish();
+                // setResult(RESULT_OK, null);
+                finish(TAG, Activity.RESULT_OK);
             }
         });
     }
 
     @Override
     protected void onResume() {
-        super.onResume();
         adapter.notifyDataSetChanged();
     }
 
     public class MyAdapter extends BaseAdapter {
         DisplayImageOptions options;
         List<PictureInfo> paths;
+        Context contextAdapter;
 
         public MyAdapter(Context context, List<PictureInfo> paths) {
             this.paths = paths;
+            contextAdapter = context;
             options = new DisplayImageOptions.Builder().cacheInMemory(true)
                     .cacheOnDisk(false)
                     .showImageForEmptyUri(
-                            finder.getDrawableId("plugin_uex_image_loading"))
+                            EUExUtil.getResIdID("plugin_uex_image_loading"))
                     .showImageOnFail(
-                            finder.getDrawableId("plugin_uex_image_loading"))
+                            EUExUtil.getResIdID("plugin_uex_image_loading"))
                     .showImageOnLoading(
-                            finder.getDrawableId("plugin_uex_image_loading"))
+                            EUExUtil.getResIdID("plugin_uex_image_loading"))
                     .bitmapConfig(Bitmap.Config.RGB_565)
                     .imageScaleType(ImageScaleType.EXACTLY)
                     .displayer(new SimpleBitmapDisplayer())
@@ -234,10 +237,10 @@ public class PictureGridActivity extends ImageBaseView {
 
             if (convertView == null || convertView.getTag() == null) {
                 viewHolder = new ViewHolder();
-                LayoutInflater inflater = getLayoutInflater();
+                LayoutInflater inflater = LayoutInflater.from(mContext);
                 convertView = inflater
                         .inflate(
-                                finder.getLayoutId(
+                                EUExUtil.getResLayoutID(
                                         "plugin_uex_image_item_grid_picture"),
                                 null);
                 viewHolder.imageView = (ImageView) convertView
@@ -279,8 +282,7 @@ public class PictureGridActivity extends ImageBaseView {
                     ImageLoader.getInstance().displayImage(url, imageAware,
                             options, null, null);
                 } else {
-                    Bitmap bitmap = CommonUtil
-                            .getLocalImage(PictureGridActivity.this, url);
+                    Bitmap bitmap = CommonUtil.getLocalImage(mContext, url);
                     imageView.setImageBitmap(bitmap);
                 }
             }
@@ -288,7 +290,7 @@ public class PictureGridActivity extends ImageBaseView {
 
                 @Override
                 public void onClick(View v) {
-                    picPreview(i);
+                    picPreview(contextAdapter, i);
                 }
             });
 
@@ -301,28 +303,26 @@ public class PictureGridActivity extends ImageBaseView {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode,
-            Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Constants.REQUEST_IMAGE_PICKER
-                && resultCode == RESULT_OK) {
-            setResult(resultCode, null);
-            finish();
-        }
-    }
+    // @Override
+    // protected void onActivityResult(int requestCode, int resultCode,
+    // Intent data) {
+    // super.onActivityResult(requestCode, resultCode, data);
+    // if (requestCode == Constants.REQUEST_IMAGE_PICKER
+    // && resultCode == RESULT_OK) {
+    // setResult(resultCode, null);
+    // finish(TAG, resultCode);
+    // }
+    // }
 
-    private void picPreview(int position) {
-        Intent intent = new Intent(PictureGridActivity.this,
-                ImagePreviewActivity.class);
-        intent.putExtra(Constants.EXTRA_FOLDER_NAME, folderName);
-        if (isOpenBrowser) {
-            EUEXImageConfig.getInstance().setStartIndex(position);
-            startActivity(intent);
-            finish();
-        } else {
-            intent.putExtra(Constants.EXTRA_PIC_INDEX, position);
-            startActivityForResult(intent, Constants.REQUEST_IMAGE_PICKER);
+    private void picPreview(Context context, int position) {
+        View imagePreviewView = new ImagePreviewActivity(context, mEUExImage,
+                folderName, position,
+                Constants.REQUEST_IMAGE_BROWSER_FROM_GRID);
+        EUEXImageConfig.getInstance().setStartIndex(position);
+        mEUExImage.addViewToWebView(imagePreviewView, ImagePreviewActivity.TAG);
+        if (isOpenBrowser && (Constants.OLD_STYLE == EUEXImageConfig
+                .getInstance().getUIStyle())) {
+            finish(TAG, Activity.RESULT_OK);
         }
     }
 
@@ -339,7 +339,7 @@ public class PictureGridActivity extends ImageBaseView {
                 if (!checkedItems.contains(buttonView.getTag())) {
                     if (checkedItems.size() >= EUEXImageConfig.getInstance()
                             .getMaxImageCount()) {
-                        Toast.makeText(PictureGridActivity.this,
+                        Toast.makeText(mContext,
                                 "最多选择" + EUEXImageConfig.getInstance()
                                         .getMaxImageCount() + "张图片",
                                 Toast.LENGTH_SHORT).show();

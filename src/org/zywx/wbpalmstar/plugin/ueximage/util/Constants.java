@@ -37,7 +37,8 @@ public class Constants {
     public static final int HIDE_IV_TO_GRID_TIMEOUT = 3000;
     public static final int SHOW_IV_TO_GRID_TIMEOUT = 500;
     /** 位置、大小 */
-    public static final String VIEW_FRAME_VO = "viewFrameConfig";
+    public static final String VIEW_FRAME_PIC_PREVIEW = "viewFramePicPreview";
+    public static final String VIEW_FRAME_PIC_GRID = "viewFramePicGrid";
     public static final String VIEW_FRAME_VO_X = "x";
     public static final String VIEW_FRAME_VO_Y = "y";
     public static final String VIEW_FRAME_VO_W = "w";
@@ -50,9 +51,13 @@ public class Constants {
     public static final int REQUEST_IMAGE_PICKER = 101;
     /** 浏览图片 */
     public static final int REQUEST_IMAGE_BROWSER = 102;
+    public static final int REQUEST_IMAGE_BROWSER_FROM_GRID = 103;
 
     /** 原Crop类中的常量 */
     public static final int REQUEST_CROP = 6709;
     public static final int REQUEST_PICK = 9162;
     public static final int RESULT_ERROR = 404;
+
+    public static final String GRID_VIEW_BACKGROUND = "backgroundColor";
+    public static final String DEF_GRID_VIEW_BG_COLOR = "#FFFFFF";
 }

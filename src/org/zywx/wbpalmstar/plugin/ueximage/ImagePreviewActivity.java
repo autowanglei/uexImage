@@ -101,6 +101,13 @@ public class ImagePreviewActivity extends ImageBaseView {
         }
     };
 
+    private OnClickListener toGridClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            startPictureGridActivity(mContext);
+        }
+    };
+
     /**
      * @param context
      * @param mEUExImage
@@ -169,7 +176,7 @@ public class ImagePreviewActivity extends ImageBaseView {
         ivGoBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish(Activity.RESULT_CANCELED);
+                finish(TAG, Activity.RESULT_CANCELED);
             }
         });
         viewPager.setAdapter(adapter);
@@ -188,7 +195,7 @@ public class ImagePreviewActivity extends ImageBaseView {
                 if (checkedItems.size() >= EUEXImageConfig.getInstance()
                         .getMinImageCount()) {
                     // setResult(RESULT_OK, null);
-                    finish(Activity.RESULT_OK);
+                    finish(TAG, Activity.RESULT_OK);
                 } else {
                     String str = String.format(
                             EUExUtil.getString(
@@ -219,11 +226,11 @@ public class ImagePreviewActivity extends ImageBaseView {
         return super.dispatchTouchEvent(event);
     }
 
-    private void startPictureGridActivity() {
-        Intent intent = new Intent(ImagePreviewActivity.this,
-                PictureGridActivity.class);
-        startActivity(intent);
-        finish(Activity.RESULT_CANCELED);
+    private void startPictureGridActivity(Context context) {
+        finish(TAG, Activity.RESULT_CANCELED);
+        View imagePreviewView = new PictureGridActivity(context, mEUExImage,
+                "", Constants.REQUEST_IMAGE_BROWSER);
+        mEUExImage.addViewToWebView(imagePreviewView, PictureGridActivity.TAG);
     }
 
     private void initViewForBrowser(final Context context) {
@@ -240,19 +247,14 @@ public class ImagePreviewActivity extends ImageBaseView {
             tvToGrid = (TextView) findViewById(
                     EUExUtil.getResIdID("tv_to_grid"));
             tvToGrid.setVisibility(View.VISIBLE);
-            tvToGrid.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    startPictureGridActivity();
-                }
-            });
+            tvToGrid.setOnClickListener(toGridClickListener);
 
             btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
                     // setResult(RESULT_OK, null);
-                    finish(Activity.RESULT_OK);
+                    finish(TAG, Activity.RESULT_OK);
                 }
             });
             if (EUEXImageConfig.getInstance().isDisplayActionButton()) {
@@ -302,13 +304,9 @@ public class ImagePreviewActivity extends ImageBaseView {
             break;
         case Constants.NEW_STYLE:
             rlTitle.setVisibility(View.INVISIBLE);
+            // rlBottom.setVisibility(View.INVISIBLE);
             ivToGrid.setVisibility(View.VISIBLE);
-            ivToGrid.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startPictureGridActivity();
-                }
-            });
+            ivToGrid.setOnClickListener(toGridClickListener);
             hideIvToGridDelayed();
             break;
         default:
@@ -333,7 +331,7 @@ public class ImagePreviewActivity extends ImageBaseView {
     }
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         if (!isOpenBrowser) {
             cbChoose.setChecked(checkedItems.contains(picList.get(picIndex)));
         }
@@ -423,25 +421,13 @@ public class ImagePreviewActivity extends ImageBaseView {
                             .removeMessages(Constants.WHAT_SHOW_IV_TO_GRID);
                 }
                 // setResult(RESULT_OK, null);
-                finish(Activity.RESULT_OK);
+                finish(TAG, Activity.RESULT_OK);
                 break;
             default:
                 break;
             }
         }
     };
-
-    /**
-     * @param resultCode
-     *            原来只有Activity.RESULT_OK,如不通过Activity.setResult设置resultCode，
-     *            resultCode默认为Activity.RESULT_CANCELED，故原来未setResult的，
-     *            添加默认值Activity.RESULT_CANCELED。
-     */
-    private void finish(int resultCode) {
-        if (mEUExImage != null) {
-            mEUExImage.closeImagePreview(mRequestCode, resultCode);
-        }
-    }
 
     private void toogleView() {
         if (rlTitle.getVisibility() == View.VISIBLE) {

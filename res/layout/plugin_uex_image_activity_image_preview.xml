@@ -7,6 +7,15 @@
         android:layout_height="match_parent"
         android:background="#000000"
         />
+<!--     <ImageView -->
+<!--         android:id="@+id/iv_to_grid" -->
+<!--         android:visibility="gone" -->
+<!--         android:layout_width="wrap_content" -->
+<!--         android:layout_height="wrap_content" -->
+<!--         android:src="@drawable/plugin_uex_image_to_grid" -->
+<!--         android:layout_marginLeft="10dp" -->
+<!--         android:layout_marginRight="10dp" -->
+<!--         android:layout_alignParentRight="true"/> -->
     <include android:id="@+id/title_layout" layout="@layout/plugin_uex_image_common_title" />
     <RelativeLayout
         android:id="@+id/rl_bottom"

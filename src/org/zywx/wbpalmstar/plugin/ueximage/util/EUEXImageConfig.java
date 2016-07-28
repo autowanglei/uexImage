@@ -21,6 +21,7 @@ package org.zywx.wbpalmstar.plugin.ueximage.util;
 import org.json.JSONArray;
 import org.zywx.wbpalmstar.plugin.ueximage.vo.ViewFrameVO;
 
+import android.graphics.Color;
 
 /**
  * Created by Fred on 2015/10/17.
@@ -70,7 +71,11 @@ public class EUEXImageConfig {
     // UI样式
     private int style;
 
-    private ViewFrameVO viewFrameVO = new ViewFrameVO();
+    /** *单张图片预览位置、大小 */
+    private ViewFrameVO viewFramePicPreview = new ViewFrameVO();
+    /** *图片grid位置、大小 */
+    private ViewFrameVO viewFrameGridPreview = new ViewFrameVO();
+    private int viewGridBg = Color.parseColor(Constants.DEF_GRID_VIEW_BG_COLOR);
 
     public int getMaxImageCount() {
         return maxImageCount;
@@ -176,11 +181,27 @@ public class EUEXImageConfig {
         this.style = style;
     }
 
-    public ViewFrameVO getViewFrameVO() {
-        return viewFrameVO;
+    public ViewFrameVO getviewFramePicPreview() {
+        return viewFramePicPreview;
     }
 
-    public void setViewFrameVO(ViewFrameVO viewFrameVO) {
-        this.viewFrameVO = viewFrameVO;
+    public void setviewFramePicPreview(ViewFrameVO viewFrameVO) {
+        this.viewFramePicPreview = viewFrameVO;
+    }
+
+    public ViewFrameVO getViewFrameGridPreview() {
+        return viewFrameGridPreview;
+    }
+
+    public void setViewFrameGridPreview(ViewFrameVO viewFrameVO) {
+        this.viewFrameGridPreview = viewFrameVO;
+    }
+
+    public int getViewGridBackground() {
+        return viewGridBg;
+    }
+
+    public void setViewGridBackground(int viewGridBg) {
+        this.viewGridBg = viewGridBg;
     }
 }

@@ -50,7 +50,8 @@
 			"displayActionButton" : false,
 			"displayNavArrows" : true,
 			"enableGrid" : true,
-			"startOnGrid" : false,
+			"startOnGrid" : true,
+			"backgroundColor" : "#4A88C1",  // style为1时生效
 			"startIndex" : 1,
 			"style" : 1,
 			data : [
@@ -73,10 +74,16 @@
 						"src" : "res://photo1.jpg"
 					}
 				   ],
-			"viewFrameConfig":{
+			"viewFramePicPreview":{   //位置、大小
 		    x:0,
 		    y:0,
 		    w:1080,
+		    h:1767,
+		},
+			"viewFramePicGrid":{   //位置、大小
+		    x:0,
+		    y:0,
+		    w:200,
 		    h:1767,
 		}
 		};

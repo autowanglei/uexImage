@@ -16,12 +16,24 @@ public class ImageBaseView extends RelativeLayout {
         mRequestCode = requestCode;
     }
 
-    public void onResume() {
+    protected void onResume() {
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+    }
+
+    /**
+     * @param resultCode
+     *            原来只有Activity.RESULT_OK,如不通过Activity.setResult设置resultCode，
+     *            resultCode默认为Activity.RESULT_CANCELED，故原来未setResult的，
+     *            添加默认值Activity.RESULT_CANCELED。
+     */
+    protected void finish(String viewTag, int resultCode) {
+        if (mEUExImage != null) {
+            mEUExImage.removeViewFromCurWindow(viewTag, mRequestCode, resultCode);
+        }
     }
 
 }
