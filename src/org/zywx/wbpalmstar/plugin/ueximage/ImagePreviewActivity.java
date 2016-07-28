@@ -304,7 +304,7 @@ public class ImagePreviewActivity extends ImageBaseView {
             break;
         case Constants.NEW_STYLE:
             rlTitle.setVisibility(View.INVISIBLE);
-            // rlBottom.setVisibility(View.INVISIBLE);
+            rlBottom.setVisibility(View.INVISIBLE);
             ivToGrid.setVisibility(View.VISIBLE);
             ivToGrid.setOnClickListener(toGridClickListener);
             hideIvToGridDelayed();
