@@ -51,9 +51,10 @@
 			"displayNavArrows" : true,
 			"enableGrid" : true,
 			"startOnGrid" : true,
-			"backgroundColor" : "#4A88C1",  // style为1时生效
 			"startIndex" : 1,
 			"style" : 1,
+			"gridBackgroundColor" : "#4A88C1",  // style为1时生效
+			"gridBrowserTitle" : "uexImage",
 			data : [
 					{
 						"src" : "res://1016.jpg"
@@ -87,6 +88,7 @@
 		    h:1767,
 		}
 		};
+		params.style = document.getElementById("UIStyle").value;
 		var data = JSON.stringify(params);
 		uexImage.openBrowser(data);
 		
@@ -183,6 +185,8 @@
 <div class="tit">uexImage-View</div>
 <div class="conbor">
     <div class="consj">
+        <span>UI样式</span>
+        <input class="textbox" type="text" id="UIStyle" value="1">
         <span>1.打开图片选择器</span>
         <input class='btn' type='button' value='openPicker' onclick='openPicker();'>
         <span>2.打开图片浏览器</span>

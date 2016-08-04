@@ -19,6 +19,7 @@
 package org.zywx.wbpalmstar.plugin.ueximage.util;
 
 import org.json.JSONArray;
+import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.vo.ViewFrameVO;
 
 import android.graphics.Color;
@@ -69,13 +70,15 @@ public class EUEXImageConfig {
     private boolean isOpenBrowser;
 
     // UI样式
-    private int style;
+    private int style = Constants.UI_STYLE_OLD;
 
     /** *单张图片预览位置、大小 */
     private ViewFrameVO viewFramePicPreview = new ViewFrameVO();
     /** *图片grid位置、大小 */
     private ViewFrameVO viewFrameGridPreview = new ViewFrameVO();
     private int viewGridBg = Color.parseColor(Constants.DEF_GRID_VIEW_BG_COLOR);
+    private String gridBrowserTitle = EUExUtil
+            .getString("plugin_uex_default_grid_browser_title");
 
     public int getMaxImageCount() {
         return maxImageCount;
@@ -203,5 +206,13 @@ public class EUEXImageConfig {
 
     public void setViewGridBackground(int viewGridBg) {
         this.viewGridBg = viewGridBg;
+    }
+
+    public String getGridBrowserTitle() {
+        return gridBrowserTitle;
+    }
+
+    public void setGridBrowserTitle(String gridBrowserTitle) {
+        this.gridBrowserTitle = gridBrowserTitle;
     }
 }

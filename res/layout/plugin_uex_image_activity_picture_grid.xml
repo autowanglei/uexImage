@@ -1,10 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_grid_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/white"
-    android:id="@+id/layout_grid_view"
+    android:background="@color/plugin_uex_image_grid_bg_colors"
     tools:context="org.zywx.wbpalmstar.plugin.ueximage.PictureGridActivity">
     <include layout="@layout/plugin_uex_image_common_title" />
 

@@ -29,9 +29,9 @@ public class Constants {
 
     public static final String UI_STYLE = "style";
     /** 插件旧风格UI */
-    public static final int OLD_STYLE = 0;
+    public static final int UI_STYLE_OLD = 0;
     /** 插件新风格UI，仿微信优化 */
-    public static final int NEW_STYLE = 1;
+    public static final int UI_STYLE_NEW = 1;
     public static final int WHAT_HIDE_IV_TO_GRID = 0;
     public static final int WHAT_SHOW_IV_TO_GRID = 1;
     public static final int HIDE_IV_TO_GRID_TIMEOUT = 3000;
@@ -58,6 +58,7 @@ public class Constants {
     public static final int REQUEST_PICK = 9162;
     public static final int RESULT_ERROR = 404;
 
-    public static final String GRID_VIEW_BACKGROUND = "backgroundColor";
-    public static final String DEF_GRID_VIEW_BG_COLOR = "#FFFFFF";
+    public static final String GRID_VIEW_BACKGROUND = "gridBackgroundColor";
+    public static final String GRID_BROWSER_TITLE = "gridBrowserTitle";
+    public static final String DEF_GRID_VIEW_BG_COLOR = "#000000";
 }

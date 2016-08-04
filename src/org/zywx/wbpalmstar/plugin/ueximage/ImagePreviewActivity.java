@@ -211,7 +211,7 @@ public class ImagePreviewActivity extends ImageBaseView {
     public boolean dispatchTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
         case MotionEvent.ACTION_UP:
-            if ((Constants.NEW_STYLE == EUEXImageConfig.getInstance()
+            if ((Constants.UI_STYLE_NEW == EUEXImageConfig.getInstance()
                     .getUIStyle()) && (ivToGrid != null)) {
                 showIvToGridDelayed();
                 if (hideIvToGridHandler
@@ -228,8 +228,8 @@ public class ImagePreviewActivity extends ImageBaseView {
 
     private void startPictureGridActivity(Context context) {
         finish(TAG, Activity.RESULT_CANCELED);
-        View imagePreviewView = new PictureGridActivity(context, mEUExImage,
-                "", Constants.REQUEST_IMAGE_BROWSER);
+        View imagePreviewView = new PictureGridActivity(context, mEUExImage, "",
+                Constants.REQUEST_IMAGE_BROWSER);
         mEUExImage.addViewToWebView(imagePreviewView, PictureGridActivity.TAG);
     }
 
@@ -242,7 +242,7 @@ public class ImagePreviewActivity extends ImageBaseView {
         tvCheckbox.setVisibility(View.INVISIBLE);
 
         switch (EUEXImageConfig.getInstance().getUIStyle()) {
-        case Constants.OLD_STYLE:
+        case Constants.UI_STYLE_OLD:
             tvShare = (TextView) findViewById(EUExUtil.getResIdID("tv_share"));
             tvToGrid = (TextView) findViewById(
                     EUExUtil.getResIdID("tv_to_grid"));
@@ -302,8 +302,8 @@ public class ImagePreviewActivity extends ImageBaseView {
                 }
             }
             break;
-        case Constants.NEW_STYLE:
-            rlTitle.setVisibility(View.INVISIBLE);
+        case Constants.UI_STYLE_NEW:
+            rlTitle.setVisibility(View.GONE);
             rlBottom.setVisibility(View.INVISIBLE);
             ivToGrid.setVisibility(View.VISIBLE);
             ivToGrid.setOnClickListener(toGridClickListener);
@@ -411,10 +411,10 @@ public class ImagePreviewActivity extends ImageBaseView {
         @Override
         public void onClick(View v) {
             switch (EUEXImageConfig.getInstance().getUIStyle()) {
-            case Constants.OLD_STYLE:
+            case Constants.UI_STYLE_OLD:
                 toogleView();
                 break;
-            case Constants.NEW_STYLE:
+            case Constants.UI_STYLE_NEW:
                 if (hideIvToGridHandler
                         .hasMessages(Constants.WHAT_SHOW_IV_TO_GRID)) {
                     hideIvToGridHandler

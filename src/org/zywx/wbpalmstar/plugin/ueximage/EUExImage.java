@@ -221,6 +221,10 @@ public class EUExImage extends EUExBase {
                 config.setViewGridBackground(Color.parseColor(
                         jsonObject.optString(Constants.GRID_VIEW_BACKGROUND)));
             }
+            if (jsonObject.has(Constants.GRID_BROWSER_TITLE)) {
+                config.setGridBrowserTitle(
+                        jsonObject.optString(Constants.GRID_BROWSER_TITLE));
+            }
             config.setIsOpenBrowser(true);
             View imagePreviewView = null;
             String viewTag = "";
@@ -254,7 +258,7 @@ public class EUExImage extends EUExBase {
             viewFrameVO.x = 0;
             viewFrameVO.y = 0;
             viewFrameVO.width = outMetrics.widthPixels;
-            viewFrameVO.height = outMetrics.heightPixels - 45;
+            viewFrameVO.height = outMetrics.heightPixels;
         }
         return viewFrameVO;
     }
@@ -383,7 +387,7 @@ public class EUExImage extends EUExBase {
         lp.leftMargin = viewFrameVO.x;
         lp.topMargin = viewFrameVO.y;
         if (addToWebViewsMap.get(tag) != null) {
-            addToWebViewsMap.remove(tag);
+            removeViewFromCurWindow(tag);
         }
         addViewToCurrentWindow(view, lp);
         addToWebViewsMap.put(tag, view);
@@ -398,7 +402,7 @@ public class EUExImage extends EUExBase {
         }
     }
 
-    public void onActivityResume(Context context) {
+    public static void onActivityResume(Context context) {
         Set<String> tagList = addToWebViewsMap.keySet();
         for (String tag : tagList) {
             if (!TextUtils.isEmpty(tag)) {

@@ -76,8 +76,14 @@ public class PictureGridActivity extends ImageBaseView {
     private List<PictureInfo> picList;
     private List<String> checkedItems;
     private MyAdapter adapter;
-
     private boolean isOpenBrowser = false;
+    private OnClickListener finishGridListener = new OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            // setResult(RESULT_OK, null);
+            finish(TAG, Activity.RESULT_OK);
+        }
+    };
 
     public PictureGridActivity(Context context, EUExImage eUExImage,
             String folderName, int requestCode) {
@@ -85,18 +91,20 @@ public class PictureGridActivity extends ImageBaseView {
         onCreate(context, folderName);
     }
 
-    private void onCreate(Context context, String folderName) {
+    private void onCreate(Context context, String folder) {
         LayoutInflater.from(context)
                 .inflate(
                         EUExUtil.getResLayoutID(
                                 "plugin_uex_image_activity_picture_grid"),
                         this, true);
-        View rootView = (View) findViewById(
-                EUExUtil.getResIdID("layout_grid_view"));
-        rootView.setBackgroundColor(
-                EUEXImageConfig.getInstance().getViewGridBackground());
+        if (Constants.UI_STYLE_NEW == EUEXImageConfig.getInstance().getUIStyle()) {
+            View rootView = (View) findViewById(
+                    EUExUtil.getResIdID("layout_grid_view"));
+            rootView.setBackgroundColor(
+                    EUEXImageConfig.getInstance().getViewGridBackground());
+        }
         uexImageUtil = UEXImageUtil.getInstance();
-        folderPath = folderName;
+        folderPath = folder;
         // 执行浏览操作
         if (TextUtils.isEmpty(folderPath)) {
             isOpenBrowser = true;
@@ -112,6 +120,7 @@ public class PictureGridActivity extends ImageBaseView {
 
         ivGoBack = (ImageView) findViewById(
                 EUExUtil.getResIdID("iv_left_on_title"));
+        ivGoBack.setOnClickListener(finishGridListener);
         tvTitle = (TextView) findViewById(EUExUtil.getResIdID("tv_title"));
         btnFinishInTitle = (Button) findViewById(
                 EUExUtil.getResIdID("btn_finish_title"));
@@ -137,12 +146,6 @@ public class PictureGridActivity extends ImageBaseView {
                     + EUEXImageConfig.getInstance().getMaxImageCount() + ")");
             btnFinishInTitle.setEnabled(true);
         }
-        ivGoBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish(TAG, Activity.RESULT_CANCELED);
-            }
-        });
         btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -162,16 +165,17 @@ public class PictureGridActivity extends ImageBaseView {
     }
 
     private void initViewForBrowser(Context context) {
-        ivGoBack.setVisibility(View.INVISIBLE);
+        if (Constants.UI_STYLE_OLD == EUEXImageConfig.getInstance().getUIStyle()) {
+            ivGoBack.setVisibility(View.INVISIBLE);
+            btnFinishInTitle.setOnClickListener(finishGridListener);
+
+        } else {
+            tvTitle.setText(
+                    EUEXImageConfig.getInstance().getGridBrowserTitle());
+            btnFinishInTitle.setVisibility(View.INVISIBLE);
+        }
         adapter = new MyAdapter(context, picList);
         gvPictures.setAdapter(adapter);
-        btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // setResult(RESULT_OK, null);
-                finish(TAG, Activity.RESULT_OK);
-            }
-        });
     }
 
     @Override
@@ -315,15 +319,11 @@ public class PictureGridActivity extends ImageBaseView {
     // }
 
     private void picPreview(Context context, int position) {
+        EUEXImageConfig.getInstance().setStartIndex(position);
         View imagePreviewView = new ImagePreviewActivity(context, mEUExImage,
                 folderName, position,
                 Constants.REQUEST_IMAGE_BROWSER_FROM_GRID);
-        EUEXImageConfig.getInstance().setStartIndex(position);
         mEUExImage.addViewToWebView(imagePreviewView, ImagePreviewActivity.TAG);
-        if (isOpenBrowser && (Constants.OLD_STYLE == EUEXImageConfig
-                .getInstance().getUIStyle())) {
-            finish(TAG, Activity.RESULT_OK);
-        }
     }
 
     private CheckBox.OnCheckedChangeListener onCheckedChangeListener = new CheckBox.OnCheckedChangeListener() {
