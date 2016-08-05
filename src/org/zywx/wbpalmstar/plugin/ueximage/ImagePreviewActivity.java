@@ -104,7 +104,8 @@ public class ImagePreviewActivity extends ImageBaseView {
     private OnClickListener toGridClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-            startPictureGridActivity(mContext);
+            startPictureGridActivity(mContext, mEUExImage, "",
+                    Constants.REQUEST_IMAGE_BROWSER);
         }
     };
 
@@ -129,7 +130,7 @@ public class ImagePreviewActivity extends ImageBaseView {
         LayoutInflater.from(context)
                 .inflate(
                         EUExUtil.getResLayoutID(
-                                "plugin_uex_image_activity_image_preview"),
+                                "plugin_uex_image_activity_image"),
                         this, true);
         uexImageUtil = UEXImageUtil.getInstance();
         isOpenBrowser = EUEXImageConfig.getInstance().getIsOpenBrowser();
@@ -226,11 +227,13 @@ public class ImagePreviewActivity extends ImageBaseView {
         return super.dispatchTouchEvent(event);
     }
 
-    private void startPictureGridActivity(Context context) {
+    private void startPictureGridActivity(Context context, EUExImage euExImage,
+            String filePath, int requestCode) {
         finish(TAG, Activity.RESULT_CANCELED);
-        View imagePreviewView = new PictureGridActivity(context, mEUExImage, "",
-                Constants.REQUEST_IMAGE_BROWSER);
-        mEUExImage.addViewToWebView(imagePreviewView, PictureGridActivity.TAG);
+        View imagePreviewView = new PictureGridActivity(context, euExImage, "",
+                requestCode);
+        euExImage.addViewToWebView(imagePreviewView, PictureGridActivity.TAG,
+                EUEXImageConfig.getInstance().getPicGridFrame());
     }
 
     private void initViewForBrowser(final Context context) {
@@ -304,7 +307,7 @@ public class ImagePreviewActivity extends ImageBaseView {
             break;
         case Constants.UI_STYLE_NEW:
             rlTitle.setVisibility(View.GONE);
-            rlBottom.setVisibility(View.INVISIBLE);
+            rlBottom.setVisibility(View.GONE);
             ivToGrid.setVisibility(View.VISIBLE);
             ivToGrid.setOnClickListener(toGridClickListener);
             hideIvToGridDelayed();

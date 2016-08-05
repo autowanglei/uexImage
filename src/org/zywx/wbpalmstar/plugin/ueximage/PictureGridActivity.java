@@ -323,7 +323,8 @@ public class PictureGridActivity extends ImageBaseView {
         View imagePreviewView = new ImagePreviewActivity(context, mEUExImage,
                 folderName, position,
                 Constants.REQUEST_IMAGE_BROWSER_FROM_GRID);
-        mEUExImage.addViewToWebView(imagePreviewView, ImagePreviewActivity.TAG);
+        mEUExImage.addViewToWebView(imagePreviewView, ImagePreviewActivity.TAG,
+                EUEXImageConfig.getInstance().getPicPreviewFrame());
     }
 
     private CheckBox.OnCheckedChangeListener onCheckedChangeListener = new CheckBox.OnCheckedChangeListener() {

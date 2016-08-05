@@ -48,10 +48,8 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -123,8 +121,12 @@ public class EUExImage extends EUExBase {
                         .setIsShowDetailedInfo(detailedInfo);
             }
             EUEXImageConfig.getInstance().setIsOpenBrowser(false);
-            Intent intent = new Intent(context, AlbumListActivity.class);
-            startActivityForResult(intent, Constants.REQUEST_IMAGE_PICKER);
+            View albumListView = new AlbumListActivity(mContext, this,
+                    Constants.REQUEST_IMAGE_PICKER);
+            addViewToWebView(albumListView, AlbumListActivity.TAG,
+                    UEXImageUtil.getFullScreenViewFrameVO(mContext, mBrwView));
+            // Intent intent = new Intent(context, AlbumListActivity.class);
+            // startActivityForResult(intent, Constants.REQUEST_IMAGE_PICKER);
 
         } catch (JSONException e) {
             if (BDebug.DEBUG) {
@@ -216,7 +218,10 @@ public class EUExImage extends EUExBase {
             if (jsonObject.has(Constants.UI_STYLE)) {
                 config.setUIStyle(jsonObject.optInt(Constants.UI_STYLE));
             }
-            config.setviewFramePicPreview(getViewFrameVO(jsonObject));
+            config.setPicPreviewFrame(getViewFrameVO(jsonObject,
+                    Constants.VIEW_FRAME_PIC_PREVIEW));
+            config.setPicGridFrame(getViewFrameVO(jsonObject,
+                    Constants.VIEW_FRAME_PIC_GRID));
             if (jsonObject.has(Constants.GRID_VIEW_BACKGROUND)) {
                 config.setViewGridBackground(Color.parseColor(
                         jsonObject.optString(Constants.GRID_VIEW_BACKGROUND)));
@@ -228,37 +233,34 @@ public class EUExImage extends EUExBase {
             config.setIsOpenBrowser(true);
             View imagePreviewView = null;
             String viewTag = "";
+            ViewFrameVO viewFrameVO = null;
             if (config.isStartOnGrid()) {
                 viewTag = PictureGridActivity.TAG;
-                imagePreviewView = new PictureGridActivity(context, this,
-                        "", Constants.REQUEST_IMAGE_BROWSER);
+                imagePreviewView = new PictureGridActivity(context, this, "",
+                        Constants.REQUEST_IMAGE_BROWSER);
+                viewFrameVO = config.getPicGridFrame();
             } else {
                 viewTag = ImagePreviewActivity.TAG;
                 imagePreviewView = new ImagePreviewActivity(context, this, "",
                         0, Constants.REQUEST_IMAGE_BROWSER);
+                viewFrameVO = config.getPicPreviewFrame();
             }
-            addViewToWebView(imagePreviewView, viewTag);
+            addViewToWebView(imagePreviewView, viewTag, viewFrameVO);
         } catch (JSONException e) {
             e.printStackTrace();
             Toast.makeText(context, "JSON解析错误", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private ViewFrameVO getViewFrameVO(JSONObject jsonObject) {
+    private ViewFrameVO getViewFrameVO(JSONObject jsonObject, String key) {
         ViewFrameVO viewFrameVO = null;
-        if (jsonObject.has(Constants.VIEW_FRAME_PIC_PREVIEW)) {
+        if (jsonObject.has(key)) {
             viewFrameVO = DataParser.viewFrameVOParser(
-                    jsonObject.optString(Constants.VIEW_FRAME_PIC_PREVIEW));
+                    jsonObject.optString(key));
         }
         if (null == viewFrameVO) {
-            WindowManager manager = ((Activity) mContext).getWindowManager();
-            DisplayMetrics outMetrics = new DisplayMetrics();
-            manager.getDefaultDisplay().getMetrics(outMetrics);
-            viewFrameVO = new ViewFrameVO();
-            viewFrameVO.x = 0;
-            viewFrameVO.y = 0;
-            viewFrameVO.width = outMetrics.widthPixels;
-            viewFrameVO.height = outMetrics.heightPixels;
+            viewFrameVO = UEXImageUtil.getFullScreenViewFrameVO(mContext,
+                    mBrwView);
         }
         return viewFrameVO;
     }
@@ -379,9 +381,8 @@ public class EUExImage extends EUExBase {
                 });
     }
 
-    public void addViewToWebView(View view, String tag) {
-        ViewFrameVO viewFrameVO = EUEXImageConfig.getInstance()
-                .getviewFramePicPreview();
+    public void addViewToWebView(View view, String tag,
+            ViewFrameVO viewFrameVO) {
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 viewFrameVO.width, viewFrameVO.height);
         lp.leftMargin = viewFrameVO.x;

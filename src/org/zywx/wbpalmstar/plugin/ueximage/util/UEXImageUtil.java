@@ -18,26 +18,6 @@
  */
 package org.zywx.wbpalmstar.plugin.ueximage.util;
 
-import android.content.Context;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.ExifInterface;
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.text.TextUtils;
-import android.util.Log;
-
-import com.ace.universalimageloader.core.DisplayImageOptions;
-import com.ace.universalimageloader.core.ImageLoader;
-import com.ace.universalimageloader.core.display.SimpleBitmapDisplayer;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.zywx.wbpalmstar.plugin.ueximage.model.PictureFolder;
-import org.zywx.wbpalmstar.plugin.ueximage.model.PictureInfo;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -49,6 +29,31 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.zywx.wbpalmstar.engine.EBrowserView;
+import org.zywx.wbpalmstar.plugin.ueximage.model.PictureFolder;
+import org.zywx.wbpalmstar.plugin.ueximage.model.PictureInfo;
+import org.zywx.wbpalmstar.plugin.ueximage.vo.ViewFrameVO;
+
+import com.ace.universalimageloader.core.DisplayImageOptions;
+import com.ace.universalimageloader.core.ImageLoader;
+import com.ace.universalimageloader.core.display.SimpleBitmapDisplayer;
+
+import android.app.Activity;
+import android.content.Context;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.media.ExifInterface;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 
 
 /**
@@ -297,5 +302,37 @@ public class UEXImageUtil {
             }
         }
         return imageDataList;
+    }
+
+    public static ViewFrameVO getFullScreenViewFrameVO(Context context,
+            EBrowserView mBrwView) {
+        ViewFrameVO viewFrameVO = new ViewFrameVO();
+        float nowScale = 1.0f;
+        int versionA = Build.VERSION.SDK_INT;
+        if (versionA <= 18) {
+            nowScale = mBrwView.getScale();
+        }
+        final View contextView = ((Activity) context).getWindow()
+                .getDecorView();
+        viewFrameVO = new ViewFrameVO();
+        viewFrameVO.x = 0;
+        viewFrameVO.y = 0;
+        viewFrameVO.width = (int) (contextView.getMeasuredWidth() / nowScale);
+        /** 去掉状态栏的高度 */
+        viewFrameVO.height = (int) Math
+                .ceil((contextView.getMeasuredHeight()
+                        - getStatusBarHeight(context))
+                        / nowScale);
+        return viewFrameVO;
+    }
+
+    private static int getStatusBarHeight(Context context) {
+        int result = 0;
+        int resourceId = context.getResources()
+                .getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 }

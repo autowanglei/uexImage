@@ -64,7 +64,7 @@
             android:name=".AlbumListActivity"
             android:theme="@style/plugin_uex_image_appTheme" >
         </activity>
-        <activity android:name=".crop.CropImageActivity"/>
+        <activity android:name="org.zywx.wbpalmstar.plugin.ueximage.AlbumListActivity"/>
     </application>
 
 </manifest>

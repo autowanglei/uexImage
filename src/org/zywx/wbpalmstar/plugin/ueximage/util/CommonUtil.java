@@ -19,22 +19,6 @@
 package org.zywx.wbpalmstar.plugin.ueximage.util;
 
 
-import android.content.Context;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.provider.MediaStore;
-
-import com.ace.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
-import com.ace.universalimageloader.cache.memory.impl.LRULimitedMemoryCache;
-import com.ace.universalimageloader.core.ImageLoader;
-import com.ace.universalimageloader.core.ImageLoaderConfiguration;
-import com.ace.universalimageloader.core.assist.QueueProcessingType;
-import com.ace.universalimageloader.core.download.BaseImageDownloader;
-
-import org.zywx.wbpalmstar.base.BUtility;
-import org.zywx.wbpalmstar.plugin.ueximage.model.PictureInfo;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -44,6 +28,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.zywx.wbpalmstar.base.BUtility;
+import org.zywx.wbpalmstar.plugin.ueximage.model.PictureInfo;
+
+import com.ace.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.ace.universalimageloader.cache.memory.impl.LRULimitedMemoryCache;
+import com.ace.universalimageloader.core.ImageLoader;
+import com.ace.universalimageloader.core.ImageLoaderConfiguration;
+import com.ace.universalimageloader.core.assist.QueueProcessingType;
+import com.ace.universalimageloader.core.download.BaseImageDownloader;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.provider.MediaStore;
 
 /**
  * 通用的工具方法

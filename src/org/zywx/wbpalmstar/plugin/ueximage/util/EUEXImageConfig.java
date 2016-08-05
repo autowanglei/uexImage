@@ -73,9 +73,9 @@ public class EUEXImageConfig {
     private int style = Constants.UI_STYLE_OLD;
 
     /** *单张图片预览位置、大小 */
-    private ViewFrameVO viewFramePicPreview = new ViewFrameVO();
+    private ViewFrameVO picPreviewFrame = new ViewFrameVO();
     /** *图片grid位置、大小 */
-    private ViewFrameVO viewFrameGridPreview = new ViewFrameVO();
+    private ViewFrameVO picGridFrame = new ViewFrameVO();
     private int viewGridBg = Color.parseColor(Constants.DEF_GRID_VIEW_BG_COLOR);
     private String gridBrowserTitle = EUExUtil
             .getString("plugin_uex_default_grid_browser_title");
@@ -184,20 +184,20 @@ public class EUEXImageConfig {
         this.style = style;
     }
 
-    public ViewFrameVO getviewFramePicPreview() {
-        return viewFramePicPreview;
+    public ViewFrameVO getPicPreviewFrame() {
+        return picPreviewFrame;
     }
 
-    public void setviewFramePicPreview(ViewFrameVO viewFrameVO) {
-        this.viewFramePicPreview = viewFrameVO;
+    public void setPicPreviewFrame(ViewFrameVO viewFrameVO) {
+        this.picPreviewFrame = viewFrameVO;
     }
 
-    public ViewFrameVO getViewFrameGridPreview() {
-        return viewFrameGridPreview;
+    public ViewFrameVO getPicGridFrame() {
+        return picGridFrame;
     }
 
-    public void setViewFrameGridPreview(ViewFrameVO viewFrameVO) {
-        this.viewFrameGridPreview = viewFrameVO;
+    public void setPicGridFrame(ViewFrameVO viewFrameVO) {
+        this.picGridFrame = viewFrameVO;
     }
 
     public int getViewGridBackground() {
