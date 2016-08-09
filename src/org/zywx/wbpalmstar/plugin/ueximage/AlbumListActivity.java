@@ -66,7 +66,7 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
 
     public AlbumListActivity(Context context, EUExImage eUExImage,
             int requestCode) {
-        super(context, eUExImage, requestCode);
+        super(context, eUExImage, requestCode, null);
         onCreate(context, eUExImage);
     }
 
@@ -87,7 +87,7 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
                 EUExUtil.getResIdID("local_album_list"));
 
         Animation animation = AnimationUtils.loadAnimation(context,
-                EUExUtil.getResIdID("plugin_uex_image_rotate_loading"));
+                EUExUtil.getResAnimID("plugin_uex_image_rotate_loading"));
         ivProgressBar.startAnimation(animation);
         initData(context);
         ivLeftTitle.setOnClickListener(commonClickListener);
@@ -100,12 +100,6 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
                         startPictureGridActivity(context, mEuExImage,
                                 pictureFolders.get(i).getFolderPath(),
                                 Constants.REQUEST_IMAGE_PICKER);
-                        // Intent intent = new Intent(AlbumListActivity.this,
-                        // PictureGridActivity.class);
-                        // intent.putExtra(Constants.EXTRA_FOLDER_PATH,
-                        // pictureFolders.get(i).getFolderPath());
-                        // startActivityForResult(intent,
-                        // Constants.REQUEST_IMAGE_PICKER);
                     }
                 });
     }
@@ -146,10 +140,27 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
         }
     };
 
-    private void startPictureGridActivity(Context context, EUExImage mEuExImage,
-            String filePath, int requestCode) {
+    private void startPictureGridActivity(final Context context,
+            final EUExImage mEuExImage, String filePath, int requestCode) {
+        // finish(TAG, Activity.RESULT_CANCELED);
         View imagePreviewView = new PictureGridActivity(context, mEUExImage,
-                filePath, requestCode);
+                filePath, requestCode, new ViewEvent() {
+                    @Override
+                    public void resultCallBack() {
+                        onCreate(mContext, mEuExImage);
+                        // if (uexImageUtil.getCheckedItems().size() > 0) {
+                        // btnRightTitle.setText("完成("
+                        // + uexImageUtil.getCheckedItems().size()
+                        // + "/" + EUEXImageConfig.getInstance()
+                        // .getMaxImageCount()
+                        // + ")");
+                        // }
+                        // adapter = new FolderAdapter(context,
+                        // uexImageUtil.getPictureFolderList());
+                        // lvAlbumList.setAdapter(adapter);
+                        // lvAlbumList.setVisibility(View.VISIBLE);
+                    }
+                });
         mEUExImage.addViewToWebView(imagePreviewView, PictureGridActivity.TAG,
                 EUEXImageConfig.getInstance().getPicGridFrame());
     }
@@ -157,11 +168,6 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
     @Override
     protected void onResume() {
         super.onResume();
-        if (uexImageUtil.getCheckedItems().size() > 0) {
-            btnRightTitle.setText("完成(" + uexImageUtil.getCheckedItems().size()
-                    + "/" + EUEXImageConfig.getInstance().getMaxImageCount()
-                    + ")");
-        }
     }
 
     private void initData(final Context context) {

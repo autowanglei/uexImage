@@ -14,7 +14,20 @@
 			max : "10",
 			quality : "0.5",
 			usePng : "false",
-			detailedInfo : "true"
+			detailedInfo : "true",
+            "viewFramePicPreview":{   //位置、大小
+            x:0,
+            y:0,
+            w:1080,
+            h:1767,
+        },
+            "style" : 1,
+            "viewFramePicGrid":{   //位置、大小
+            x:0,
+            y:0,
+            w:1080,
+            h:1767,
+        }
 		};
 		var data = JSON.stringify(params);
 		uexImage.openPicker(data);

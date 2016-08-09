@@ -80,14 +80,24 @@ public class PictureGridActivity extends ImageBaseView {
     private OnClickListener finishGridListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-            // setResult(RESULT_OK, null);
-            finish(TAG, Activity.RESULT_OK);
+            // int resultCode = Constants.REQUEST_IMAGE_BROWSER;
+            // if (isOpenBrowser) {
+            // resultCode = Activity.RESULT_OK;
+            // } else {
+            // resultCode = Activity.RESULT_CANCELED;
+            // }
+            if (mViewEvent != null) {
+                mViewEvent.resultCallBack();
+            }
+            int resultCode = (Constants.REQUEST_IMAGE_BROWSER == mRequestCode)
+                    ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
+            finish(TAG, resultCode);
         }
     };
 
     public PictureGridActivity(Context context, EUExImage eUExImage,
-            String folderName, int requestCode) {
-        super(context, eUExImage, requestCode);
+            String folderName, int requestCode, ViewEvent viewEvent) {
+        super(context, eUExImage, requestCode, viewEvent);
         onCreate(context, folderName);
     }
 
@@ -167,8 +177,6 @@ public class PictureGridActivity extends ImageBaseView {
     private void initViewForBrowser(Context context) {
         if (Constants.UI_STYLE_OLD == EUEXImageConfig.getInstance().getUIStyle()) {
             ivGoBack.setVisibility(View.INVISIBLE);
-            btnFinishInTitle.setOnClickListener(finishGridListener);
-
         } else {
             tvTitle.setText(
                     EUEXImageConfig.getInstance().getGridBrowserTitle());
@@ -266,7 +274,6 @@ public class PictureGridActivity extends ImageBaseView {
             final ImageView imageView = viewHolder.imageView;
             PictureInfo pictureInfo = paths.get(i);
 
-            final ViewHolder tempViewHolder = viewHolder;
             if (!isOpenBrowser) {
                 ImageAware imageAware = new ImageViewAware(viewHolder.imageView,
                         false);

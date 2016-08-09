@@ -7,13 +7,15 @@ public class ImageBaseView extends RelativeLayout {
     protected Context mContext;
     protected EUExImage mEUExImage;
     protected int mRequestCode;
+    protected ViewEvent mViewEvent;
 
     public ImageBaseView(Context context, EUExImage eUExImage,
-            int requestCode) {
+            int requestCode, ViewEvent viewEvent) {
         super(context);
         mContext = context;
         mEUExImage = eUExImage;
         mRequestCode = requestCode;
+        mViewEvent = viewEvent;
     }
 
     protected void onResume() {
@@ -35,5 +37,9 @@ public class ImageBaseView extends RelativeLayout {
             mEUExImage.removeViewFromCurWindow(viewTag, mRequestCode, resultCode);
         }
     }
+
+    static interface ViewEvent {
+        public void resultCallBack();
+    };
 
 }

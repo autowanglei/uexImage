@@ -121,7 +121,7 @@ public class ImagePreviewActivity extends ImageBaseView {
      */
     public ImagePreviewActivity(Context context, EUExImage mEUExImage,
             String folderName, int picIndex, int requestCode) {
-        super(context, mEUExImage, requestCode);
+        super(context, mEUExImage, requestCode, null);
         mContext = context;
         onCreate(context, folderName, picIndex);
     }
@@ -130,7 +130,7 @@ public class ImagePreviewActivity extends ImageBaseView {
         LayoutInflater.from(context)
                 .inflate(
                         EUExUtil.getResLayoutID(
-                                "plugin_uex_image_activity_image"),
+                                "plugin_uex_image_activity_image_preview"),
                         this, true);
         uexImageUtil = UEXImageUtil.getInstance();
         isOpenBrowser = EUEXImageConfig.getInstance().getIsOpenBrowser();
@@ -231,7 +231,7 @@ public class ImagePreviewActivity extends ImageBaseView {
             String filePath, int requestCode) {
         finish(TAG, Activity.RESULT_CANCELED);
         View imagePreviewView = new PictureGridActivity(context, euExImage, "",
-                requestCode);
+                requestCode, null);
         euExImage.addViewToWebView(imagePreviewView, PictureGridActivity.TAG,
                 EUEXImageConfig.getInstance().getPicGridFrame());
     }

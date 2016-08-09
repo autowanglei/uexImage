@@ -121,6 +121,7 @@ public class EUExImage extends EUExBase {
                         .setIsShowDetailedInfo(detailedInfo);
             }
             EUEXImageConfig.getInstance().setIsOpenBrowser(false);
+            setUIConfigExtend(jsonObject);
             View albumListView = new AlbumListActivity(mContext, this,
                     Constants.REQUEST_IMAGE_PICKER);
             addViewToWebView(albumListView, AlbumListActivity.TAG,
@@ -133,6 +134,27 @@ public class EUExImage extends EUExBase {
                 Log.i(TAG, e.getMessage());
             }
             Toast.makeText(context, "JSON解析错误", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setUIConfigExtend(JSONObject jsonObject) {
+        EUEXImageConfig config = EUEXImageConfig.getInstance();
+        if (jsonObject.has(Constants.UI_STYLE)) {
+            config.setUIStyle(jsonObject.optInt(Constants.UI_STYLE));
+        }
+        if (Constants.UI_STYLE_NEW == config.getUIStyle()) {
+            config.setPicPreviewFrame(getViewFrameVO(jsonObject,
+                    Constants.VIEW_FRAME_PIC_PREVIEW));
+            config.setPicGridFrame(
+                    getViewFrameVO(jsonObject, Constants.VIEW_FRAME_PIC_GRID));
+            if (jsonObject.has(Constants.GRID_VIEW_BACKGROUND)) {
+                config.setViewGridBackground(Color.parseColor(
+                        jsonObject.optString(Constants.GRID_VIEW_BACKGROUND)));
+            }
+            if (jsonObject.has(Constants.GRID_BROWSER_TITLE)) {
+                config.setGridBrowserTitle(
+                        jsonObject.optString(Constants.GRID_BROWSER_TITLE));
+            }
         }
     }
 
@@ -215,21 +237,7 @@ public class EUExImage extends EUExBase {
                 }
                 config.setStartIndex(startIndex);
             }
-            if (jsonObject.has(Constants.UI_STYLE)) {
-                config.setUIStyle(jsonObject.optInt(Constants.UI_STYLE));
-            }
-            config.setPicPreviewFrame(getViewFrameVO(jsonObject,
-                    Constants.VIEW_FRAME_PIC_PREVIEW));
-            config.setPicGridFrame(getViewFrameVO(jsonObject,
-                    Constants.VIEW_FRAME_PIC_GRID));
-            if (jsonObject.has(Constants.GRID_VIEW_BACKGROUND)) {
-                config.setViewGridBackground(Color.parseColor(
-                        jsonObject.optString(Constants.GRID_VIEW_BACKGROUND)));
-            }
-            if (jsonObject.has(Constants.GRID_BROWSER_TITLE)) {
-                config.setGridBrowserTitle(
-                        jsonObject.optString(Constants.GRID_BROWSER_TITLE));
-            }
+            setUIConfigExtend(jsonObject);
             config.setIsOpenBrowser(true);
             View imagePreviewView = null;
             String viewTag = "";
@@ -237,7 +245,7 @@ public class EUExImage extends EUExBase {
             if (config.isStartOnGrid()) {
                 viewTag = PictureGridActivity.TAG;
                 imagePreviewView = new PictureGridActivity(context, this, "",
-                        Constants.REQUEST_IMAGE_BROWSER);
+                        Constants.REQUEST_IMAGE_BROWSER, null);
                 viewFrameVO = config.getPicGridFrame();
             } else {
                 viewTag = ImagePreviewActivity.TAG;
@@ -412,22 +420,42 @@ public class EUExImage extends EUExBase {
         }
     }
 
+    private void removeAllViewFromCurWindow() {
+        Set<String> tagList = addToWebViewsMap.keySet();
+        for (String tag : tagList) {
+            if (!TextUtils.isEmpty(tag)) {
+                removeViewFromCurWindow(tag);
+            }
+        }
+    }
+
     public void removeViewFromCurWindow(String viewTag, int requestCode,
             int resultCode) {
         removeViewFromCurWindow(viewTag);
+        JSONObject jsonObject = null;
         switch (requestCode) {
         case Constants.REQUEST_IMAGE_PICKER:
             switch (resultCode) {
             case Activity.RESULT_OK:
-
+                removeAllViewFromCurWindow();
+                jsonObject = uexImageUtil.getChoosedPicInfo(context);
+                callBackPluginJs(JsConst.CALLBACK_ON_PICKER_CLOSED,
+                        jsonObject.toString());
                 break;
             case Constants.OPERATION_CANCELLED:
-
+                jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("isCancelled", true);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                callBackPluginJs(JsConst.CALLBACK_ON_PICKER_CLOSED,
+                        jsonObject.toString());
                 break;
-
             default:
                 break;
             }
+            uexImageUtil.resetData();
             break;
         case Constants.REQUEST_IMAGE_BROWSER:
             if (Activity.RESULT_OK == resultCode) {
