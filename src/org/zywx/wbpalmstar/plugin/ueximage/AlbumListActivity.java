@@ -147,18 +147,16 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
                 filePath, requestCode, new ViewEvent() {
                     @Override
                     public void resultCallBack() {
-                        onCreate(mContext, mEuExImage);
-                        // if (uexImageUtil.getCheckedItems().size() > 0) {
-                        // btnRightTitle.setText("完成("
-                        // + uexImageUtil.getCheckedItems().size()
-                        // + "/" + EUEXImageConfig.getInstance()
-                        // .getMaxImageCount()
-                        // + ")");
-                        // }
-                        // adapter = new FolderAdapter(context,
-                        // uexImageUtil.getPictureFolderList());
-                        // lvAlbumList.setAdapter(adapter);
-                        // lvAlbumList.setVisibility(View.VISIBLE);
+                        // onCreate(mContext, mEuExImage);
+                        if (uexImageUtil.getCheckedItems().size() > 0) {
+                            btnRightTitle.setText("完成("
+                                    + uexImageUtil.getCheckedItems().size()
+                                    + "/" + EUEXImageConfig.getInstance()
+                                            .getMaxImageCount()
+                                    + ")");
+                        }
+                        // initData(context);
+                        adapter.notifyDataSetChanged();
                     }
                 });
         mEUExImage.addViewToWebView(imagePreviewView, PictureGridActivity.TAG,

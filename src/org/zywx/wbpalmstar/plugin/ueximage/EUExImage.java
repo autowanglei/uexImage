@@ -455,7 +455,9 @@ public class EUExImage extends EUExBase {
             default:
                 break;
             }
-            uexImageUtil.resetData();
+            if (!addToWebViewsMap.containsKey(AlbumListActivity.TAG)) {
+                uexImageUtil.resetData();
+            }
             break;
         case Constants.REQUEST_IMAGE_BROWSER:
             if (Activity.RESULT_OK == resultCode) {
