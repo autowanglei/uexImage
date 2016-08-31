@@ -61,4 +61,5 @@ public class Constants {
     public static final String GRID_VIEW_BACKGROUND = "gridBackgroundColor";
     public static final String GRID_BROWSER_TITLE = "gridBrowserTitle";
     public static final String DEF_GRID_VIEW_BG_COLOR = "#000000";
+    public static final String LONG_CLICK_CB_IMAGE_PATH = "imagePath";
 }

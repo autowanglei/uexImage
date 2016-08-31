@@ -29,6 +29,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.util.CommonUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
 import org.zywx.wbpalmstar.plugin.ueximage.util.EUEXImageConfig;
 import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
+import org.zywx.wbpalmstar.plugin.ueximage.vo.ImageLongClickCBVO;
 
 import com.ace.universalimageloader.core.DisplayImageOptions;
 import com.ace.universalimageloader.core.ImageLoader;
@@ -394,7 +395,9 @@ public class ImagePreviewActivity extends ImageBaseView {
 
                 @Override
                 public boolean onLongClick(View v) {
-                    mEUExImage.onImageLongClick();
+                    ImageLongClickCBVO cbVO = new ImageLongClickCBVO();
+                    cbVO.setImagePath(src);
+                    mEUExImage.onImageLongClick(cbVO.toStr());
                     return false;
                 }
             });

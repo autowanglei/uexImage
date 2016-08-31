@@ -649,8 +649,8 @@ public class EUExImage extends EUExBase {
                 jsonResult.toString());
     }
 
-    public void onImageLongClick() {
-        callBackPluginJs(JsConst.CALLBACK_ON_IAMGE_LONG_CLICKED, "");
+    public void onImageLongClick(String cbVO) {
+        callBackPluginJs(JsConst.CALLBACK_ON_IAMGE_LONG_CLICKED, cbVO);
     }
 
     private void callBackPluginJs(String methodName, String jsonData) {

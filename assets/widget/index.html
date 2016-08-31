@@ -154,18 +154,18 @@
 			uexImage.onCropperClosed = onCropperClosed;
 			uexImage.cbSaveToPhotoAlbum = cbSaveToPhotoAlbum;
 			uexImage.cbClearOutputImages = cbClearOutputImages;
-			uexImage.onIamgeLongClicked = onIamgeLongClicked;
+			uexImage.onImageLongClicked = onImageLongClicked;
 		}
 	}
 
-	function onIamgeLongClicked(info) {
-		alert("onIamgeLongClicked:" + info);
+	function onImageLongClicked(info) {
+		alert("onImageLongClicked:" + info);
 
         createActionSheet();
 	}
 	
 	function cbOpenPicker(info) {
-	    alert("onIamgeLongClicked:" + info);
+	    alert("cbOpenPicker:" + info);
 	}
 	function onPickerClosed(info) {
 		alert("onPickerClosed:" + info);
