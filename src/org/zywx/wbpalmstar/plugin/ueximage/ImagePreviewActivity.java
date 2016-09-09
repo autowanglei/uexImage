@@ -185,8 +185,11 @@ public class ImagePreviewActivity extends ImageBaseView {
         viewPager.setCurrentItem(picIndex);
         viewPager.setOnPageChangeListener(onPageChangeListener);
         if (checkedItems.size() > 0) {
-            btnFinishInTitle.setText("完成(" + checkedItems.size() + "/"
-                    + EUEXImageConfig.getInstance().getMaxImageCount() + ")");
+            btnFinishInTitle
+                    .setText(EUExUtil.getString("plugin_uex_image_crop_done")
+                            + "(" + checkedItems.size() + "/"
+                            + EUEXImageConfig.getInstance().getMaxImageCount()
+                            + ")");
             btnFinishInTitle.setEnabled(true);
         }
         cbChoose.setTag(picList.get(picIndex).getSrc());
@@ -282,7 +285,9 @@ public class ImagePreviewActivity extends ImageBaseView {
                                         + File.separator
                                         + "uex_image_to_share.jpg");
                         if (bitmap == null) {
-                            Toast.makeText(context, "当前图片尚未加载完毕，请稍后重试",
+                            Toast.makeText(context,
+                                    EUExUtil.getString(
+                                            "plugin_uex_image_retry_load_image"),
                                     Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -293,9 +298,10 @@ public class ImagePreviewActivity extends ImageBaseView {
                                     Uri.fromFile(file));
                             shareIntent.setType("image/*");
                             // startActivity(
-                            // Intent.createChooser(shareIntent, "分享到"));
                         } else {
-                            Toast.makeText(context, "图片操作失败，请重试",
+                            Toast.makeText(context,
+                                    EUExUtil.getString(
+                                            "plugin_uex_image_image_error"),
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -504,8 +510,11 @@ public class ImagePreviewActivity extends ImageBaseView {
                     if (checkedItems.size() >= EUEXImageConfig.getInstance()
                             .getMaxImageCount()) {
                         Toast.makeText(mContext,
-                                "最多选择" + EUEXImageConfig.getInstance()
-                                        .getMaxImageCount() + "张图片",
+                                String.format(
+                                        EUExUtil.getString(
+                                                "plugin_uex_image_at_most_choose"),
+                                        EUEXImageConfig.getInstance()
+                                                .getMaxImageCount()),
                                 Toast.LENGTH_SHORT).show();
                         buttonView.setChecked(false);
                         return;
@@ -518,12 +527,15 @@ public class ImagePreviewActivity extends ImageBaseView {
                 }
             }
             if (checkedItems.size() > 0) {
-                btnFinishInTitle.setText("完成(" + checkedItems.size() + "/"
-                        + EUEXImageConfig.getInstance().getMaxImageCount()
-                        + ")");
+                btnFinishInTitle.setText(
+                        EUExUtil.getString("plugin_uex_image_crop_done") + "("
+                                + checkedItems.size() + "/" + EUEXImageConfig
+                                        .getInstance().getMaxImageCount()
+                                + ")");
                 btnFinishInTitle.setEnabled(true);
             } else {
-                btnFinishInTitle.setText("完成");
+                btnFinishInTitle.setText(
+                        EUExUtil.getString("plugin_uex_image_crop_done"));
                 btnFinishInTitle.setEnabled(false);
             }
         }

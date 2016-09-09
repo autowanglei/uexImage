@@ -60,46 +60,29 @@
 	
 	function openBrowser() {
 		var params = {
-			"displayActionButton" : false,
-			"displayNavArrows" : true,
-			"enableGrid" : true,
-			"startOnGrid" : true,
 			"startIndex" : 1,
 			"style" : 1,
-			"gridBackgroundColor" : "#4A88C1",  // style为1时生效
-			"gridBrowserTitle" : "uexImage",
-			data : [
-					{
-						"src" : "res://1016.jpg"
-					},
-					{
-					    "src" : "res://photo2.jpg"
-					},
-					{
-					    "src" : "res://photo3.jpg"
-					},
-					{
-					    "src" : "res://photo4.jpg"
-					},
-					{
-					    "src" : "res://photo4t.jpg"
-					},
-					{
-						"src" : "res://photo1.jpg"
-					}
-				   ],
-			"viewFramePicPreview":{   //位置、大小
-		    x:0,
-		    y:0,
-		    w:1080,
-		    h:1767,
-		},
-			"viewFramePicGrid":{   //位置、大小
-		    x:0,
-		    y:0,
-		    w:1080,
-		    h:1767,
-		}
+			data:["res://1016.jpg","res://photo2.jpg","res://photo3.jpg"],
+//			data : [
+//					{
+//						"src" : "res://1016.jpg"
+//					},
+//					{
+//					    "src" : "res://photo2.jpg"
+//					},
+//					{
+//					    "src" : "res://photo3.jpg"
+//					},
+//					{
+//					    "src" : "res://photo4.jpg"
+//					},
+//					{
+//					    "src" : "res://photo4t.jpg"
+//					},
+//					{
+//						"src" : "res://photo1.jpg"
+//					}
+//				   ],
 		};
 		params.style = document.getElementById("UIStyle").value;
 		var data = JSON.stringify(params);

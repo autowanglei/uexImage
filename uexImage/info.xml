@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
     <plugin
-        uexName="uexImage" version="3.0.19.1" build="2016083101">
-        <info>20:1.根据微信样式优化UI效果;添加图片长按回调。</info>
+        uexName="uexImage" version="3.0.19.5" build="2016090904">
+        <info>20:1.根据微信样式优化UI效果;添加长按图片的回调。
+                 2.修复插件包资源引起的打不开界面的问题。
+                 5.插件支持国际化。</info>
         <build>19:修改库的引入方式，移除aar</build>
         <build>18:修改库的引入方式，移除aar</build>
         <build>17:引入第三方裁剪库，解决方形裁剪问题</build>

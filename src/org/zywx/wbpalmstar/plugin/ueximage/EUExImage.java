@@ -32,6 +32,7 @@ import org.zywx.wbpalmstar.base.BDebug;
 import org.zywx.wbpalmstar.base.BUtility;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
+import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.crop.Crop;
 import org.zywx.wbpalmstar.plugin.ueximage.util.CommonUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
@@ -64,10 +65,6 @@ public class EUExImage extends EUExBase {
     private Context context;
     private UEXImageUtil uexImageUtil;
     // private ResoureFinder finder;
-    private final String FILE_SYSTEM_ERROR = "文件系统操作出错";
-    private final String SAME_FILE_IN_DCIM = "系统相册中存在同名文件";
-    private final String JSON_FORMAT_ERROR = "json格式错误";
-    private final String NOT_SUPPORT_CROP = "你的设备不支持剪切功能！";
     /** * 保存添加到网页的view */
     private static Map<String, View> addToWebViewsMap = new HashMap<String, View>();
 
@@ -133,7 +130,9 @@ public class EUExImage extends EUExBase {
             if (BDebug.DEBUG) {
                 Log.i(TAG, e.getMessage());
             }
-            Toast.makeText(context, "JSON解析错误", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context,
+                    EUExUtil.getString("plugin_uex_image_json_format_error"),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -142,11 +141,11 @@ public class EUExImage extends EUExBase {
         if (jsonObject.has(Constants.UI_STYLE)) {
             config.setUIStyle(jsonObject.optInt(Constants.UI_STYLE));
         }
+        config.setPicPreviewFrame(
+                getViewFrameVO(jsonObject, Constants.VIEW_FRAME_PIC_PREVIEW));
+        config.setPicGridFrame(
+                getViewFrameVO(jsonObject, Constants.VIEW_FRAME_PIC_GRID));
         if (Constants.UI_STYLE_NEW == config.getUIStyle()) {
-            config.setPicPreviewFrame(getViewFrameVO(jsonObject,
-                    Constants.VIEW_FRAME_PIC_PREVIEW));
-            config.setPicGridFrame(
-                    getViewFrameVO(jsonObject, Constants.VIEW_FRAME_PIC_GRID));
             if (jsonObject.has(Constants.GRID_VIEW_BACKGROUND)) {
                 config.setViewGridBackground(Color.parseColor(
                         jsonObject.optString(Constants.GRID_VIEW_BACKGROUND)));
@@ -168,7 +167,9 @@ public class EUExImage extends EUExBase {
             JSONObject jsonObject = new JSONObject(json);
             EUEXImageConfig config = EUEXImageConfig.getInstance();
             if (!jsonObject.has("data")) {
-                Toast.makeText(context, "data不能为空", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context,
+                        EUExUtil.getString("plugin_uex_image_data_cannot_null"),
+                        Toast.LENGTH_SHORT).show();
                 return;
             } else {
                 JSONArray data = jsonObject.getJSONArray("data");
@@ -185,7 +186,10 @@ public class EUExImage extends EUExBase {
                         JSONObject obj = data.getJSONObject(i);
                         if (!obj.has("src")) {
                             Toast.makeText(context,
-                                    "data中第" + (i + 1) + "个元素的src不能为空",
+                                    String.format(
+                                            EUExUtil.getString(
+                                                    "plugin_uex_image_data_src_cannot_null"),
+                                            (i + 1)),
                                     Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -256,15 +260,17 @@ public class EUExImage extends EUExBase {
             addViewToWebView(imagePreviewView, viewTag, viewFrameVO);
         } catch (JSONException e) {
             e.printStackTrace();
-            Toast.makeText(context, "JSON解析错误", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context,
+                    EUExUtil.getString("plugin_uex_image_json_format_error"),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
     private ViewFrameVO getViewFrameVO(JSONObject jsonObject, String key) {
         ViewFrameVO viewFrameVO = null;
         if (jsonObject.has(key)) {
-            viewFrameVO = DataParser.viewFrameVOParser(
-                    jsonObject.optString(key));
+            viewFrameVO = DataParser
+                    .viewFrameVOParser(jsonObject.optString(key));
         }
         if (null == viewFrameVO) {
             viewFrameVO = UEXImageUtil.getFullScreenViewFrameVO(mContext,
@@ -285,7 +291,9 @@ public class EUExImage extends EUExBase {
             JSONObject jsonObject = new JSONObject(json);
             if (!jsonObject.has("src")
                     || TextUtils.isEmpty(jsonObject.getString("src"))) {
-                Toast.makeText(context, "src不能为空", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context,
+                        EUExUtil.getString("plugin_uex_image_src_cannot_null"),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
             src = jsonObject.getString("src");
@@ -296,7 +304,9 @@ public class EUExImage extends EUExBase {
             if (jsonObject.has("quality")) {
                 double qualityParam = jsonObject.getDouble("quality");
                 if (qualityParam < 0 || qualityParam > 1) {
-                    Toast.makeText(context, "quality 只能在0-1之间",
+                    Toast.makeText(context,
+                            EUExUtil.getString(
+                                    "plugin_uex_image_quality_range"),
                             Toast.LENGTH_SHORT).show();
                 } else {
                     cropQuality = qualityParam;
@@ -315,7 +325,9 @@ public class EUExImage extends EUExBase {
             }
         } catch (JSONException e) {
             Log.i(TAG, e.getMessage());
-            Toast.makeText(context, "JSON解析错误", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context,
+                    EUExUtil.getString("plugin_uex_image_json_format_error"),
+                    Toast.LENGTH_SHORT).show();
         }
         File file;
         // 先将assets文件写入到临时文件夹中
@@ -332,8 +344,9 @@ public class EUExImage extends EUExBase {
                 destFile.deleteOnExit();
                 destFile.createNewFile();
             } catch (IOException e) {
-                Toast.makeText(context, FILE_SYSTEM_ERROR, Toast.LENGTH_SHORT)
-                        .show();
+                Toast.makeText(context,
+                        EUExUtil.getString("plugin_uex_image_system_error"),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
             if (srcPath.startsWith("/data")) {
@@ -343,8 +356,9 @@ public class EUExImage extends EUExBase {
                     destFile)) {
                 file = destFile;
             } else {
-                Toast.makeText(context, FILE_SYSTEM_ERROR, Toast.LENGTH_SHORT)
-                        .show();
+                Toast.makeText(context,
+                        EUExUtil.getString("plugin_uex_image_system_error"),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
         } else {
@@ -374,8 +388,9 @@ public class EUExImage extends EUExBase {
             Crop.of(Uri.fromFile(imageFile), destination, cropQuality,
                     cropUsePng).asSquare().start((Activity) mContext);
         } catch (Exception exception) {
-            Toast.makeText(context, NOT_SUPPORT_CROP, Toast.LENGTH_SHORT)
-                    .show();
+            Toast.makeText(context,
+                    EUExUtil.getString("plugin_uex_image_not_support_crop"),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -517,7 +532,8 @@ public class EUExImage extends EUExBase {
                 break;
             case 2:
                 result.put("isCancelled", false);
-                result.put("data", "系统错误");
+                result.put("data",
+                        EUExUtil.getString("plugin_uex_image_system_error"));
                 break;
             case 3:
                 result.put("isCancelled", true);
@@ -542,8 +558,10 @@ public class EUExImage extends EUExBase {
             JSONObject jsonObject = new JSONObject(json);
             if (!jsonObject.has("localPath")
                     || TextUtils.isEmpty(jsonObject.getString("localPath"))) {
-                Toast.makeText(context, "localPath不能为空", Toast.LENGTH_SHORT)
-                        .show();
+                Toast.makeText(context,
+                        EUExUtil.getString(
+                                "plugin_uex_image_localPath_cannot_null"),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
             if (jsonObject.has("extraInfo")) {
@@ -566,7 +584,8 @@ public class EUExImage extends EUExBase {
                 File file = new File(dcimPath, fileName);
                 if (file.exists()) {
                     resultObject.put("isSuccess", false);
-                    resultObject.put("errorStr", SAME_FILE_IN_DCIM);
+                    resultObject.put("errorStr", EUExUtil
+                            .getString("plugin_uex_image_same_name_file"));
                     callBackPluginJs(JsConst.CALLBACK_SAVE_TO_PHOTO_ALBUM,
                             resultObject.toString());
                     return;
@@ -582,7 +601,8 @@ public class EUExImage extends EUExBase {
                     updateGallery(file.getAbsolutePath());
                 } else {
                     resultObject.put("isSuccess", false);
-                    resultObject.put("errorStr", FILE_SYSTEM_ERROR);
+                    resultObject.put("errorStr", EUExUtil
+                            .getString("plugin_uex_image_system_error"));
                 }
             } else {// 如果傳的是別的路徑，也復制一份吧。
                 File fromFile = new File(realPath);
@@ -594,7 +614,8 @@ public class EUExImage extends EUExBase {
                 File destFile = new File(dcimPath, fileName);
                 if (destFile.exists()) {
                     resultObject.put("isSuccess", false);
-                    resultObject.put("errorStr", SAME_FILE_IN_DCIM);
+                    resultObject.put("errorStr", EUExUtil
+                            .getString("plugin_uex_image_same_name_file"));
                     callBackPluginJs(JsConst.CALLBACK_SAVE_TO_PHOTO_ALBUM,
                             resultObject.toString());
                     return;
@@ -605,7 +626,8 @@ public class EUExImage extends EUExBase {
                     updateGallery(destFile.getAbsolutePath());
                 } else {
                     resultObject.put("isSuccess", false);
-                    resultObject.put("errorStr", FILE_SYSTEM_ERROR);
+                    resultObject.put("errorStr", EUExUtil
+                            .getString("plugin_uex_image_system_error"));
                 }
             }
             callBackPluginJs(JsConst.CALLBACK_SAVE_TO_PHOTO_ALBUM,
@@ -614,7 +636,8 @@ public class EUExImage extends EUExBase {
             Log.i(TAG, e.getMessage());
             try {
                 resultObject.put("isSuccess", false);
-                resultObject.put("errorStr", JSON_FORMAT_ERROR);
+                resultObject.put("errorStr", EUExUtil
+                        .getString("plugin_uex_image_json_format_error"));
             } catch (JSONException e2) {
                 Log.i(TAG, e2.getMessage());
             }
@@ -624,7 +647,8 @@ public class EUExImage extends EUExBase {
             Log.i(TAG, e.getMessage());
             try {
                 resultObject.put("isSuccess", false);
-                resultObject.put("errorStr", FILE_SYSTEM_ERROR);
+                resultObject.put("errorStr",
+                        EUExUtil.getString("plugin_uex_image_system_error"));
             } catch (JSONException e2) {
                 Log.i(TAG, e2.getMessage());
             }

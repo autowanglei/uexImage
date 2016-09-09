@@ -149,11 +149,16 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
                     public void resultCallBack() {
                         // onCreate(mContext, mEuExImage);
                         if (uexImageUtil.getCheckedItems().size() > 0) {
-                            btnRightTitle.setText("完成("
-                                    + uexImageUtil.getCheckedItems().size()
-                                    + "/" + EUEXImageConfig.getInstance()
-                                            .getMaxImageCount()
-                                    + ")");
+                            btnRightTitle.setText(
+                                    EUExUtil.getString(
+                                            "plugin_uex_image_crop_done")
+                                            + "("
+                                            + uexImageUtil.getCheckedItems()
+                                                    .size()
+                                            + "/"
+                                            + EUEXImageConfig.getInstance()
+                                                    .getMaxImageCount()
+                                            + ")");
                         }
                         // initData(context);
                         adapter.notifyDataSetChanged();

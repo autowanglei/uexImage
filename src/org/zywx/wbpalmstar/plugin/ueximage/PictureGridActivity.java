@@ -107,7 +107,8 @@ public class PictureGridActivity extends ImageBaseView {
                         EUExUtil.getResLayoutID(
                                 "plugin_uex_image_activity_picture_grid"),
                         this, true);
-        if (Constants.UI_STYLE_NEW == EUEXImageConfig.getInstance().getUIStyle()) {
+        if (Constants.UI_STYLE_NEW == EUEXImageConfig.getInstance()
+                .getUIStyle()) {
             View rootView = (View) findViewById(
                     EUExUtil.getResIdID("layout_grid_view"));
             rootView.setBackgroundColor(
@@ -152,8 +153,11 @@ public class PictureGridActivity extends ImageBaseView {
         gvPictures.setAdapter(adapter);
         checkedItems = uexImageUtil.getCheckedItems();
         if (checkedItems.size() > 0) {
-            btnFinishInTitle.setText("完成(" + checkedItems.size() + "/"
-                    + EUEXImageConfig.getInstance().getMaxImageCount() + ")");
+            btnFinishInTitle
+                    .setText(EUExUtil.getString("plugin_uex_image_crop_done")
+                            + "(" + checkedItems.size() + "/" + EUEXImageConfig
+                                    .getInstance().getMaxImageCount()
+                            + ")");
             btnFinishInTitle.setEnabled(true);
         }
         btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
@@ -175,7 +179,8 @@ public class PictureGridActivity extends ImageBaseView {
     }
 
     private void initViewForBrowser(Context context) {
-        if (Constants.UI_STYLE_OLD == EUEXImageConfig.getInstance().getUIStyle()) {
+        if (Constants.UI_STYLE_OLD == EUEXImageConfig.getInstance()
+                .getUIStyle()) {
             ivGoBack.setVisibility(View.INVISIBLE);
         } else {
             tvTitle.setText(
@@ -348,8 +353,11 @@ public class PictureGridActivity extends ImageBaseView {
                     if (checkedItems.size() >= EUEXImageConfig.getInstance()
                             .getMaxImageCount()) {
                         Toast.makeText(mContext,
-                                "最多选择" + EUEXImageConfig.getInstance()
-                                        .getMaxImageCount() + "张图片",
+                                String.format(
+                                        EUExUtil.getString(
+                                                "plugin_uex_image_at_most_choose"),
+                                        EUEXImageConfig.getInstance()
+                                                .getMaxImageCount()),
                                 Toast.LENGTH_SHORT).show();
                         buttonView.setChecked(false);
                         return;
@@ -358,12 +366,15 @@ public class PictureGridActivity extends ImageBaseView {
                 }
             }
             if (checkedItems.size() > 0) {
-                btnFinishInTitle.setText("完成(" + checkedItems.size() + "/"
-                        + EUEXImageConfig.getInstance().getMaxImageCount()
-                        + ")");
+                btnFinishInTitle.setText(
+                        EUExUtil.getString("plugin_uex_image_crop_done") + "("
+                                + checkedItems.size() + "/" + EUEXImageConfig
+                                        .getInstance().getMaxImageCount()
+                                + ")");
                 btnFinishInTitle.setEnabled(true);
             } else {
-                btnFinishInTitle.setText("完成");
+                btnFinishInTitle.setText(
+                        EUExUtil.getString("plugin_uex_image_crop_done"));
                 btnFinishInTitle.setEnabled(false);
             }
         }

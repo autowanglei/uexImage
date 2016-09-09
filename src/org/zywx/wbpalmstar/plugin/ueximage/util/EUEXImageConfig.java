@@ -78,7 +78,7 @@ public class EUEXImageConfig {
     private ViewFrameVO picGridFrame = new ViewFrameVO();
     private int viewGridBg = Color.parseColor(Constants.DEF_GRID_VIEW_BG_COLOR);
     private String gridBrowserTitle = EUExUtil
-            .getString("plugin_uex_default_grid_browser_title");
+            .getString("plugin_uex_image_default_grid_browser_title");
 
     public int getMaxImageCount() {
         return maxImageCount;
