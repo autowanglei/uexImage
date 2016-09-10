@@ -83,6 +83,7 @@ public class ImagePreviewActivity extends ImageBaseView {
     private RelativeLayout rlBottom;
     private AlphaAnimation fadeInAnim;
     private AlphaAnimation fadeOutAnim;
+    private ImageBaseView mImagePreviewActivity = null;
     /** *单张浏览模式下，3s没有任何操作，隐藏切换到Grid浏览模式的ImageView */
     private Handler hideIvToGridHandler = new Handler() {
         @Override
@@ -121,10 +122,12 @@ public class ImagePreviewActivity extends ImageBaseView {
      *            this code will be returned in finish() when the view exits.
      */
     public ImagePreviewActivity(Context context, EUExImage mEUExImage,
-            String folderName, int picIndex, int requestCode) {
-        super(context, mEUExImage, requestCode, null);
+            String folderName, int picIndex, int requestCode,
+            ViewEvent viewEvent) {
+        super(context, mEUExImage, requestCode, viewEvent, TAG);
         mContext = context;
         onCreate(context, folderName, picIndex);
+        mImagePreviewActivity = this;
     }
 
     private void onCreate(Context context, String folderName, int picIndex) {
@@ -201,6 +204,9 @@ public class ImagePreviewActivity extends ImageBaseView {
                         .getMinImageCount()) {
                     // setResult(RESULT_OK, null);
                     finish(TAG, Activity.RESULT_OK);
+                    if (mViewEvent != null) {
+                        mViewEvent.resultCallBack();
+                    }
                 } else {
                     String str = String.format(
                             EUExUtil.getString(
@@ -235,8 +241,13 @@ public class ImagePreviewActivity extends ImageBaseView {
             String filePath, int requestCode) {
         finish(TAG, Activity.RESULT_CANCELED);
         View imagePreviewView = new PictureGridActivity(context, euExImage, "",
-                requestCode, null);
-        euExImage.addViewToWebView(imagePreviewView, PictureGridActivity.TAG,
+                requestCode, new ViewEvent() {
+                    @Override
+                    public void resultCallBack() {
+                        mImagePreviewActivity.requestViewFocus();
+                    }
+                });
+        euExImage.addViewToCurrentWindow(imagePreviewView, PictureGridActivity.TAG,
                 EUEXImageConfig.getInstance().getPicGridFrame());
     }
 

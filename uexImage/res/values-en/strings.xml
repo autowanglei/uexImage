@@ -21,5 +21,6 @@
     <string name="plugin_uex_image_quality_range">quality shoud be between 0-1.</string>
     <string name="plugin_uex_image_retry_load_image">The current picture has not been loaded, Please try again later.</string>
     <string name="plugin_uex_image_image_error">Operation failed，Please try again.</string>
+    <string name="plugin_uex_image_image_laoad_error">Image loading failed.</string>
     
 </resources>

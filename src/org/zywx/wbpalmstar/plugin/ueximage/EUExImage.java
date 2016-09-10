@@ -21,9 +21,8 @@ package org.zywx.wbpalmstar.plugin.ueximage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,6 +32,7 @@ import org.zywx.wbpalmstar.base.BUtility;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
+import org.zywx.wbpalmstar.plugin.ueximage.ImageBaseView.ViewEvent;
 import org.zywx.wbpalmstar.plugin.ueximage.crop.Crop;
 import org.zywx.wbpalmstar.plugin.ueximage.util.CommonUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
@@ -66,7 +66,7 @@ public class EUExImage extends EUExBase {
     private UEXImageUtil uexImageUtil;
     // private ResoureFinder finder;
     /** * 保存添加到网页的view */
-    private static Map<String, View> addToWebViewsMap = new HashMap<String, View>();
+    private static ConcurrentHashMap<String, View> addToWebViewsMap = new ConcurrentHashMap<String, View>();
 
     public EUExImage(Context context, EBrowserView eBrowserView) {
         super(context, eBrowserView);
@@ -121,7 +121,7 @@ public class EUExImage extends EUExBase {
             setUIConfigExtend(jsonObject);
             View albumListView = new AlbumListActivity(mContext, this,
                     Constants.REQUEST_IMAGE_PICKER);
-            addViewToWebView(albumListView, AlbumListActivity.TAG,
+            addViewToCurrentWindow(albumListView, AlbumListActivity.TAG,
                     UEXImageUtil.getFullScreenViewFrameVO(mContext, mBrwView));
             // Intent intent = new Intent(context, AlbumListActivity.class);
             // startActivityForResult(intent, Constants.REQUEST_IMAGE_PICKER);
@@ -243,21 +243,33 @@ public class EUExImage extends EUExBase {
             }
             setUIConfigExtend(jsonObject);
             config.setIsOpenBrowser(true);
-            View imagePreviewView = null;
             String viewTag = "";
             ViewFrameVO viewFrameVO = null;
+            View imagePreviewView = null;
             if (config.isStartOnGrid()) {
                 viewTag = PictureGridActivity.TAG;
                 imagePreviewView = new PictureGridActivity(context, this, "",
-                        Constants.REQUEST_IMAGE_BROWSER, null);
+                        Constants.REQUEST_IMAGE_BROWSER, new ViewEvent() {
+                            @Override
+                            public void resultCallBack() {
+                                // ((ImageBaseView) imagePreviewView)
+                                // .requestViewFocus();
+                            }
+                        });
                 viewFrameVO = config.getPicGridFrame();
             } else {
                 viewTag = ImagePreviewActivity.TAG;
                 imagePreviewView = new ImagePreviewActivity(context, this, "",
-                        0, Constants.REQUEST_IMAGE_BROWSER);
+                        0, Constants.REQUEST_IMAGE_BROWSER, new ViewEvent() {
+                            @Override
+                            public void resultCallBack() {
+                                // ((ImageBaseView) imagePreviewView)
+                                // .requestViewFocus();
+                            }
+                        });
                 viewFrameVO = config.getPicPreviewFrame();
             }
-            addViewToWebView(imagePreviewView, viewTag, viewFrameVO);
+            addViewToCurrentWindow(imagePreviewView, viewTag, viewFrameVO);
         } catch (JSONException e) {
             e.printStackTrace();
             Toast.makeText(context,
@@ -404,7 +416,7 @@ public class EUExImage extends EUExBase {
                 });
     }
 
-    public void addViewToWebView(View view, String tag,
+    public void addViewToCurrentWindow(View view, String tag,
             ViewFrameVO viewFrameVO) {
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 viewFrameVO.width, viewFrameVO.height);

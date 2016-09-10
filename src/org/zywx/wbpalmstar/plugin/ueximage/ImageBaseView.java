@@ -1,6 +1,9 @@
 package org.zywx.wbpalmstar.plugin.ueximage;
 
+import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
+
 import android.content.Context;
+import android.view.KeyEvent;
 import android.widget.RelativeLayout;
 
 public class ImageBaseView extends RelativeLayout {
@@ -8,14 +11,37 @@ public class ImageBaseView extends RelativeLayout {
     protected EUExImage mEUExImage;
     protected int mRequestCode;
     protected ViewEvent mViewEvent;
+    private String TAG = "";
 
     public ImageBaseView(Context context, EUExImage eUExImage,
-            int requestCode, ViewEvent viewEvent) {
+            int requestCode, ViewEvent viewEvent, String tag) {
         super(context);
         mContext = context;
         mEUExImage = eUExImage;
         mRequestCode = requestCode;
         mViewEvent = viewEvent;
+        TAG = tag;
+        requestViewFocus();
+    }
+
+    protected void requestViewFocus() {
+        if (isInTouchMode()) {
+            setFocusableInTouchMode(true);
+            requestFocusFromTouch();
+        } else {
+            setFocusable(true);
+            requestFocus();
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+        case KeyEvent.KEYCODE_BACK:
+            finish(TAG, Constants.OPERATION_CANCELLED);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     protected void onResume() {
@@ -33,12 +59,15 @@ public class ImageBaseView extends RelativeLayout {
      *            添加默认值Activity.RESULT_CANCELED。
      */
     protected void finish(String viewTag, int resultCode) {
+        if (mViewEvent != null) {
+            mViewEvent.resultCallBack();
+        }
         if (mEUExImage != null) {
             mEUExImage.removeViewFromCurWindow(viewTag, mRequestCode, resultCode);
         }
     }
 
-    static interface ViewEvent {
+    public static interface ViewEvent {
         public void resultCallBack();
     };
 

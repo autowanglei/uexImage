@@ -71,5 +71,6 @@
     <string name="plugin_uex_image_quality_range">quality 只能在0-1之间</string>
     <string name="plugin_uex_image_retry_load_image">当前图片尚未加载完毕，请稍后重试</string>
     <string name="plugin_uex_image_image_error">图片操作失败，请重试</string>
+    <string name="plugin_uex_image_image_laoad_error">图片加载失败</string>
 
 </resources>

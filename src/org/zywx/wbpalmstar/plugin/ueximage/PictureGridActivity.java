@@ -77,6 +77,7 @@ public class PictureGridActivity extends ImageBaseView {
     private List<String> checkedItems;
     private MyAdapter adapter;
     private boolean isOpenBrowser = false;
+    private ImageBaseView mPictureGridActivity = null;
     private OnClickListener finishGridListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -85,10 +86,10 @@ public class PictureGridActivity extends ImageBaseView {
             // resultCode = Activity.RESULT_OK;
             // } else {
             // resultCode = Activity.RESULT_CANCELED;
+            // // }
+            // if (mViewEvent != null) {
+            // mViewEvent.resultCallBack();
             // }
-            if (mViewEvent != null) {
-                mViewEvent.resultCallBack();
-            }
             int resultCode = (Constants.REQUEST_IMAGE_BROWSER == mRequestCode)
                     ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
             finish(TAG, resultCode);
@@ -97,8 +98,9 @@ public class PictureGridActivity extends ImageBaseView {
 
     public PictureGridActivity(Context context, EUExImage eUExImage,
             String folderName, int requestCode, ViewEvent viewEvent) {
-        super(context, eUExImage, requestCode, viewEvent);
+        super(context, eUExImage, requestCode, viewEvent, TAG);
         onCreate(context, folderName);
+        mPictureGridActivity = this;
     }
 
     private void onCreate(Context context, String folder) {
@@ -152,14 +154,7 @@ public class PictureGridActivity extends ImageBaseView {
         adapter = new MyAdapter(mContext, picList);
         gvPictures.setAdapter(adapter);
         checkedItems = uexImageUtil.getCheckedItems();
-        if (checkedItems.size() > 0) {
-            btnFinishInTitle
-                    .setText(EUExUtil.getString("plugin_uex_image_crop_done")
-                            + "(" + checkedItems.size() + "/" + EUEXImageConfig
-                                    .getInstance().getMaxImageCount()
-                            + ")");
-            btnFinishInTitle.setEnabled(true);
-        }
+        updateBtnFinish();
         btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -329,14 +324,38 @@ public class PictureGridActivity extends ImageBaseView {
     // finish(TAG, resultCode);
     // }
     // }
-
     private void picPreview(Context context, int position) {
         EUEXImageConfig.getInstance().setStartIndex(position);
         View imagePreviewView = new ImagePreviewActivity(context, mEUExImage,
-                folderName, position,
-                Constants.REQUEST_IMAGE_BROWSER_FROM_GRID);
-        mEUExImage.addViewToWebView(imagePreviewView, ImagePreviewActivity.TAG,
+                folderName, position, Constants.REQUEST_IMAGE_BROWSER_FROM_GRID,
+                new ViewEvent() {
+
+                    @Override
+                    public void resultCallBack() {
+                        updateBtnFinish();
+                        mPictureGridActivity.requestViewFocus();
+                    }
+                });
+        mEUExImage.addViewToCurrentWindow(imagePreviewView,
+                ImagePreviewActivity.TAG,
                 EUEXImageConfig.getInstance().getPicPreviewFrame());
+    }
+
+    private void updateBtnFinish() {
+        if (!isOpenBrowser) {
+            if (checkedItems.size() > 0) {
+                btnFinishInTitle.setText(
+                        EUExUtil.getString("plugin_uex_image_crop_done") + "("
+                                + checkedItems.size() + "/" + EUEXImageConfig
+                                        .getInstance().getMaxImageCount()
+                                + ")");
+                btnFinishInTitle.setEnabled(true);
+            } else {
+                btnFinishInTitle.setText(
+                        EUExUtil.getString("plugin_uex_image_crop_done"));
+                btnFinishInTitle.setEnabled(false);
+            }
+        }
     }
 
     private CheckBox.OnCheckedChangeListener onCheckedChangeListener = new CheckBox.OnCheckedChangeListener() {
@@ -365,18 +384,7 @@ public class PictureGridActivity extends ImageBaseView {
                     checkedItems.add((String) buttonView.getTag());
                 }
             }
-            if (checkedItems.size() > 0) {
-                btnFinishInTitle.setText(
-                        EUExUtil.getString("plugin_uex_image_crop_done") + "("
-                                + checkedItems.size() + "/" + EUEXImageConfig
-                                        .getInstance().getMaxImageCount()
-                                + ")");
-                btnFinishInTitle.setEnabled(true);
-            } else {
-                btnFinishInTitle.setText(
-                        EUExUtil.getString("plugin_uex_image_crop_done"));
-                btnFinishInTitle.setEnabled(false);
-            }
+            updateBtnFinish();
         }
     };
     SimpleImageLoadingListener loadingListener = new SimpleImageLoadingListener() {
