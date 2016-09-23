@@ -25,7 +25,14 @@ public class Constants {
     public static final String EXTRA_PIC_INDEX = "image_position";
 
     public static final String HTTP = "http";
+    /**
+     * 选择取消
+     */
     public static final int OPERATION_CANCELLED = 1000;
+    /**
+     * 选择完成
+     */
+    public static final int OPERATION_CONFIRMED = 1001;
 
     public static final String UI_STYLE = "style";
     /** 插件旧风格UI */

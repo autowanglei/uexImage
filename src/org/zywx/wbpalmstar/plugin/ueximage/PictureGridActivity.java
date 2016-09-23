@@ -40,7 +40,6 @@ import com.ace.universalimageloader.core.imageaware.ImageViewAware;
 import com.ace.universalimageloader.core.listener.PauseOnScrollListener;
 import com.ace.universalimageloader.core.listener.SimpleImageLoadingListener;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -90,9 +89,11 @@ public class PictureGridActivity extends ImageBaseView {
             // if (mViewEvent != null) {
             // mViewEvent.resultCallBack();
             // }
-            int resultCode = (Constants.REQUEST_IMAGE_BROWSER == mRequestCode)
-                    ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
-            finish(TAG, resultCode);
+            // int resultCode = (Constants.REQUEST_IMAGE_BROWSER ==
+            // mRequestCode)
+            // ? Constants.OPERATION_CANCELLED
+            // : Constants.OPERATION_CONFIRMED;
+            finish(TAG, Constants.OPERATION_CANCELLED);
         }
     };
 
@@ -161,7 +162,7 @@ public class PictureGridActivity extends ImageBaseView {
                 if (checkedItems.size() >= EUEXImageConfig.getInstance()
                         .getMinImageCount()) {
                     // setResult(RESULT_OK, new Intent());
-                    finish(TAG, Activity.RESULT_OK);
+                    finish(TAG, Constants.OPERATION_CONFIRMED);
                 } else {
                     String str = String.format(
                             EUExUtil.getString(
@@ -297,7 +298,7 @@ public class PictureGridActivity extends ImageBaseView {
                     imageView.setImageBitmap(bitmap);
                 }
             }
-            imageView.setOnClickListener(new View.OnClickListener() {
+            imageView.setOnClickListener(new OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
@@ -331,9 +332,17 @@ public class PictureGridActivity extends ImageBaseView {
                 new ViewEvent() {
 
                     @Override
-                    public void resultCallBack() {
-                        updateBtnFinish();
-                        mPictureGridActivity.requestViewFocus();
+                    public void resultCallBack(int requestCode,
+                            int resultCode) {
+                        if (resultCode == Constants.OPERATION_CONFIRMED) {
+                            // 大图点击了完成，应直接完成选择，关闭此页面并给回调
+                            finish(TAG, resultCode);
+                        } else {
+                            // 大图点击返回，小图界面刷新选择状态，继续选择
+                            updateBtnFinish();
+                            adapter.notifyDataSetChanged();
+                            mPictureGridActivity.requestViewFocus();
+                        }
                     }
                 });
         mEUExImage.addViewToCurrentWindow(imagePreviewView,
@@ -349,11 +358,11 @@ public class PictureGridActivity extends ImageBaseView {
                                 + checkedItems.size() + "/" + EUEXImageConfig
                                         .getInstance().getMaxImageCount()
                                 + ")");
-                btnFinishInTitle.setEnabled(true);
+                // btnFinishInTitle.setEnabled(true);
             } else {
                 btnFinishInTitle.setText(
                         EUExUtil.getString("plugin_uex_image_crop_done"));
-                btnFinishInTitle.setEnabled(false);
+                // btnFinishInTitle.setEnabled(false);
             }
         }
     }

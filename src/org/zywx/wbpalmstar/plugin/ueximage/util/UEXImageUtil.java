@@ -131,6 +131,9 @@ public class UEXImageUtil {
         while (cursor.moveToNext()) {
             int id = cursor.getInt(0);// 大图ID
             String path = cursor.getString(1);// 大图路径
+            if (path == null) {
+                continue;
+            }
             File file = new File(path);
             // 获取目录名
             File parentFile = file.getParentFile();

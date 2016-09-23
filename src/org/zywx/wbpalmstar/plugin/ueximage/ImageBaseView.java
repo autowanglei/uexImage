@@ -4,6 +4,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
 
 import android.content.Context;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
 public class ImageBaseView extends RelativeLayout {
@@ -34,6 +35,13 @@ public class ImageBaseView extends RelativeLayout {
         }
     }
 
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        super.onTouchEvent(event);
+        return true;
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
@@ -60,15 +68,24 @@ public class ImageBaseView extends RelativeLayout {
      */
     protected void finish(String viewTag, int resultCode) {
         if (mViewEvent != null) {
-            mViewEvent.resultCallBack();
+            mViewEvent.resultCallBack(mRequestCode, resultCode);
         }
         if (mEUExImage != null) {
-            mEUExImage.removeViewFromCurWindow(viewTag, mRequestCode, resultCode);
+            mEUExImage.removeViewFromCurWindow(viewTag);
         }
     }
 
     public static interface ViewEvent {
-        public void resultCallBack();
+        /**
+         * 界面关闭回调
+         * 
+         * @param requestCode
+         *            标识这次界面的类型是选择还是浏览
+         * 
+         * @param resultCode
+         *            标识这次关闭是否是完成操作（否，则是返回操作）
+         */
+        public void resultCallBack(int requestCode, int resultCode);
     };
 
 }

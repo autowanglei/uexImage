@@ -120,7 +120,14 @@ public class EUExImage extends EUExBase {
             EUEXImageConfig.getInstance().setIsOpenBrowser(false);
             setUIConfigExtend(jsonObject);
             View albumListView = new AlbumListActivity(mContext, this,
-                    Constants.REQUEST_IMAGE_PICKER);
+                    Constants.REQUEST_IMAGE_PICKER, new ViewEvent() {
+
+                        @Override
+                        public void resultCallBack(int requestCode,
+                                int resultCode) {
+                            callbackPickerResult(requestCode, resultCode);
+                        }
+                    });
             addViewToCurrentWindow(albumListView, AlbumListActivity.TAG,
                     UEXImageUtil.getFullScreenViewFrameVO(mContext, mBrwView));
             // Intent intent = new Intent(context, AlbumListActivity.class);
@@ -251,9 +258,9 @@ public class EUExImage extends EUExBase {
                 imagePreviewView = new PictureGridActivity(context, this, "",
                         Constants.REQUEST_IMAGE_BROWSER, new ViewEvent() {
                             @Override
-                            public void resultCallBack() {
-                                // ((ImageBaseView) imagePreviewView)
-                                // .requestViewFocus();
+                            public void resultCallBack(int requestCode,
+                                    int resultCode) {
+                                callbackPickerResult(requestCode, resultCode);
                             }
                         });
                 viewFrameVO = config.getPicGridFrame();
@@ -262,9 +269,9 @@ public class EUExImage extends EUExBase {
                 imagePreviewView = new ImagePreviewActivity(context, this, "",
                         0, Constants.REQUEST_IMAGE_BROWSER, new ViewEvent() {
                             @Override
-                            public void resultCallBack() {
-                                // ((ImageBaseView) imagePreviewView)
-                                // .requestViewFocus();
+                            public void resultCallBack(int requestCode,
+                                    int resultCode) {
+                                callbackPickerResult(requestCode, resultCode);
                             }
                         });
                 viewFrameVO = config.getPicPreviewFrame();
@@ -429,7 +436,7 @@ public class EUExImage extends EUExBase {
         addToWebViewsMap.put(tag, view);
     }
 
-    private void removeViewFromCurWindow(String viewTag) {
+    public void removeViewFromCurWindow(String viewTag) {
         View removeView = addToWebViewsMap.get(viewTag);
         if (removeView != null) {
             removeViewFromCurrentWindow(removeView);
@@ -456,15 +463,13 @@ public class EUExImage extends EUExBase {
         }
     }
 
-    public void removeViewFromCurWindow(String viewTag, int requestCode,
-            int resultCode) {
-        removeViewFromCurWindow(viewTag);
+    private void callbackPickerResult(int requestCode, int resultCode) {
         JSONObject jsonObject = null;
         switch (requestCode) {
         case Constants.REQUEST_IMAGE_PICKER:
             switch (resultCode) {
-            case Activity.RESULT_OK:
-                removeAllViewFromCurWindow();
+            case Constants.OPERATION_CONFIRMED:
+                // removeAllViewFromCurWindow();
                 jsonObject = uexImageUtil.getChoosedPicInfo(context);
                 callBackPluginJs(JsConst.CALLBACK_ON_PICKER_CLOSED,
                         jsonObject.toString());
@@ -482,15 +487,15 @@ public class EUExImage extends EUExBase {
             default:
                 break;
             }
-            if (!addToWebViewsMap.containsKey(AlbumListActivity.TAG)) {
-                uexImageUtil.resetData();
-            }
+            // if (!addToWebViewsMap.containsKey(AlbumListActivity.TAG)) {
+            uexImageUtil.resetData();
+            // }
             break;
         case Constants.REQUEST_IMAGE_BROWSER:
-            if (Activity.RESULT_OK == resultCode) {
-                callBackPluginJs(JsConst.CALLBACK_ON_BROWSER_CLOSED,
-                        "pic browser closed");
-            }
+            // if (Constants.OPERATION_CONFIRMED == resultCode) {
+            callBackPluginJs(JsConst.CALLBACK_ON_BROWSER_CLOSED,
+                    "pic browser closed");
+            // }
             break;
         default:
             break;

@@ -34,7 +34,6 @@ import org.zywx.wbpalmstar.plugin.ueximage.vo.ImageLongClickCBVO;
 import com.ace.universalimageloader.core.DisplayImageOptions;
 import com.ace.universalimageloader.core.ImageLoader;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -106,8 +105,12 @@ public class ImagePreviewActivity extends ImageBaseView {
     private OnClickListener toGridClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-            startPictureGridActivity(mContext, mEUExImage, "",
-                    Constants.REQUEST_IMAGE_BROWSER);
+            if (mRequestCode == Constants.REQUEST_IMAGE_BROWSER_FROM_GRID) {
+                finish(TAG, Constants.OPERATION_CANCELLED);
+            } else {
+                startPictureGridActivity(mContext, mEUExImage, "",
+                        Constants.REQUEST_IMAGE_BROWSER);
+            }
         }
     };
 
@@ -181,7 +184,7 @@ public class ImagePreviewActivity extends ImageBaseView {
         ivGoBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish(TAG, Activity.RESULT_CANCELED);
+                finish(TAG, Constants.OPERATION_CANCELLED);
             }
         });
         viewPager.setAdapter(adapter);
@@ -195,7 +198,9 @@ public class ImagePreviewActivity extends ImageBaseView {
                             + ")");
             btnFinishInTitle.setEnabled(true);
         }
-        cbChoose.setTag(picList.get(picIndex).getSrc());
+        PictureInfo pictureInfo = picList.get(picIndex);
+        cbChoose.setTag(pictureInfo.getSrc());
+        cbChoose.setChecked(checkedItems.contains(pictureInfo.getSrc()));
         cbChoose.setOnCheckedChangeListener(onCheckedChangeListener);
         btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -203,10 +208,7 @@ public class ImagePreviewActivity extends ImageBaseView {
                 if (checkedItems.size() >= EUEXImageConfig.getInstance()
                         .getMinImageCount()) {
                     // setResult(RESULT_OK, null);
-                    finish(TAG, Activity.RESULT_OK);
-                    if (mViewEvent != null) {
-                        mViewEvent.resultCallBack();
-                    }
+                    finish(TAG, Constants.OPERATION_CONFIRMED);
                 } else {
                     String str = String.format(
                             EUExUtil.getString(
@@ -239,11 +241,13 @@ public class ImagePreviewActivity extends ImageBaseView {
 
     private void startPictureGridActivity(Context context, EUExImage euExImage,
             String filePath, int requestCode) {
-        finish(TAG, Activity.RESULT_CANCELED);
+        // 由起始的单图浏览进入多图浏览，没有pick的情况
+        // finish(TAG, Constants.OPERATION_CANCELLED);
         View imagePreviewView = new PictureGridActivity(context, euExImage, "",
                 requestCode, new ViewEvent() {
                     @Override
-                    public void resultCallBack() {
+                    public void resultCallBack(int requestCode,
+                            int resultCode) {
                         mImagePreviewActivity.requestViewFocus();
                     }
                 });
@@ -272,7 +276,7 @@ public class ImagePreviewActivity extends ImageBaseView {
                 @Override
                 public void onClick(View v) {
                     // setResult(RESULT_OK, null);
-                    finish(TAG, Activity.RESULT_OK);
+                    finish(TAG, Constants.OPERATION_CONFIRMED);
                 }
             });
             if (EUEXImageConfig.getInstance().isDisplayActionButton()) {
@@ -389,6 +393,8 @@ public class ImagePreviewActivity extends ImageBaseView {
             DisplayImageOptions options = new DisplayImageOptions.Builder()
                     .cacheInMemory(true).cacheOnDisk(true)
                     .bitmapConfig(Bitmap.Config.RGB_565)
+                    .showImageOnFail(
+                            EUExUtil.getResIdID("plugin_uex_demo_image"))
                     .showImageOnLoading(
                             EUExUtil.getResIdID("plugin_uex_image_loading"))
                     .considerExifParams(true)// 考虑Exif旋转
@@ -429,7 +435,7 @@ public class ImagePreviewActivity extends ImageBaseView {
         }
     };
 
-    private View.OnClickListener imageClickListener = new View.OnClickListener() {
+    private OnClickListener imageClickListener = new OnClickListener() {
 
         @Override
         public void onClick(View v) {
@@ -444,7 +450,7 @@ public class ImagePreviewActivity extends ImageBaseView {
                             .removeMessages(Constants.WHAT_SHOW_IV_TO_GRID);
                 }
                 // setResult(RESULT_OK, null);
-                finish(TAG, Activity.RESULT_OK);
+                finish(TAG, Constants.OPERATION_CANCELLED);
                 break;
             default:
                 break;

@@ -66,8 +66,8 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
     private ImageBaseView mAlbumListActivity = null;
 
     public AlbumListActivity(Context context, EUExImage eUExImage,
-            int requestCode) {
-        super(context, eUExImage, requestCode, null, TAG);
+            int requestCode, ViewEvent viewEvent) {
+        super(context, eUExImage, requestCode, viewEvent, TAG);
         onCreate(context, eUExImage);
         mAlbumListActivity = this;
     }
@@ -134,7 +134,7 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
                             EUEXImageConfig.getInstance().getMinImageCount()),
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    finish(TAG, Activity.RESULT_OK);
+                    finish(TAG, Constants.OPERATION_CONFIRMED);
                     // setResult(RESULT_OK, null);
                     // finish();
                 }
@@ -145,22 +145,32 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
     private void startPictureGridActivity(final Context context,
             final EUExImage mEuExImage, String filePath, int requestCode) {
         // finish(TAG, Activity.RESULT_CANCELED);
+        // 这里暂时只有Pick会调用，没有Browser
         View imagePreviewView = new PictureGridActivity(context, mEUExImage,
                 filePath, requestCode, new ViewEvent() {
                     @Override
-                    public void resultCallBack() {
+                    public void resultCallBack(int requestCode,
+                            int resultCode) {
                         // onCreate(mContext, mEuExImage);
-                        if (uexImageUtil.getCheckedItems().size() > 0) {
-                            btnRightTitle.setText(EUExUtil.getString(
-                                    "plugin_uex_image_crop_done") + "("
-                                    + uexImageUtil.getCheckedItems().size()
-                                    + "/" + EUEXImageConfig.getInstance()
-                                            .getMaxImageCount()
-                                    + ")");
-                        }
-                        // initData(context);
-                        adapter.notifyDataSetChanged();
                         mAlbumListActivity.requestViewFocus();
+                        if (resultCode == Constants.OPERATION_CONFIRMED) {
+                            finish(TAG, resultCode);
+                        } else {
+                            if (uexImageUtil.getCheckedItems().size() > 0) {
+                                btnRightTitle
+                                        .setText(EUExUtil.getString(
+                                                "plugin_uex_image_crop_done")
+                                                + "("
+                                                + uexImageUtil.getCheckedItems()
+                                                        .size()
+                                                + "/"
+                                                + EUEXImageConfig.getInstance()
+                                                        .getMaxImageCount()
+                                                + ")");
+                            }
+                            // initData(context);
+                            adapter.notifyDataSetChanged();
+                        }
                     }
                 });
         mEUExImage.addViewToCurrentWindow(imagePreviewView,
