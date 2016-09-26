@@ -35,7 +35,6 @@ public class ImageBaseView extends RelativeLayout {
         }
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
