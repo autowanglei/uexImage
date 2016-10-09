@@ -37,6 +37,7 @@ import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.model.PictureFolder;
 import org.zywx.wbpalmstar.plugin.ueximage.model.PictureInfo;
+import org.zywx.wbpalmstar.plugin.ueximage.vo.PicSizeVO;
 import org.zywx.wbpalmstar.plugin.ueximage.vo.ViewFrameVO;
 
 import com.ace.universalimageloader.core.DisplayImageOptions;
@@ -355,5 +356,34 @@ public class UEXImageUtil {
             result = context.getResources().getDimensionPixelSize(resourceId);
         }
         return result;
+    }
+
+    public static int getInSampleSize(double scale) {
+        double log = Math.log(scale) / Math.log(2);
+        double logCeil = Math.ceil(log);
+        return (int) Math.pow(2, logCeil);
+    }
+
+    public static PicSizeVO getPicSizeVOList(int desLength) {
+        PicSizeVO mPicSizeVO = null;
+        switch (desLength) {
+        case Constants.DES_FILE_LENGTH_10K:
+            mPicSizeVO = new PicSizeVO(Constants.HEIGHT_10K,
+                    Constants.WIDTH_10K);
+            break;
+        case Constants.DES_FILE_LENGTH_30K:
+            mPicSizeVO = new PicSizeVO(Constants.HEIGHT_30K,
+                    Constants.WIDTH_30K);
+            break;
+        case Constants.DES_FILE_LENGTH_100K:
+            mPicSizeVO = new PicSizeVO(Constants.HEIGHT_100K,
+                    Constants.WIDTH_100K);
+            break;
+        default:
+            mPicSizeVO = new PicSizeVO(Constants.HEIGHT_30K,
+                    Constants.WIDTH_30K);
+            break;
+        }
+        return mPicSizeVO;
     }
 }

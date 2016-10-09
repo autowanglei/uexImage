@@ -29,6 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.zywx.wbpalmstar.base.BDebug;
 import org.zywx.wbpalmstar.base.BUtility;
+import org.zywx.wbpalmstar.engine.DataHelper;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
@@ -39,6 +40,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
 import org.zywx.wbpalmstar.plugin.ueximage.util.DataParser;
 import org.zywx.wbpalmstar.plugin.ueximage.util.EUEXImageConfig;
 import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
+import org.zywx.wbpalmstar.plugin.ueximage.vo.CompressImageVO;
 import org.zywx.wbpalmstar.plugin.ueximage.vo.ViewFrameVO;
 
 import android.app.Activity;
@@ -67,6 +69,7 @@ public class EUExImage extends EUExBase {
     // private ResoureFinder finder;
     /** * 保存添加到网页的view */
     private static ConcurrentHashMap<String, View> addToWebViewsMap = new ConcurrentHashMap<String, View>();
+    private EUExImageAgent mEuExImageAgent = null;
 
     public EUExImage(Context context, EBrowserView eBrowserView) {
         super(context, eBrowserView);
@@ -79,6 +82,7 @@ public class EUExImage extends EUExBase {
         }
         CommonUtil.initImageLoader(context);
         uexImageUtil = UEXImageUtil.getInstance();
+        mEuExImageAgent = EUExImageAgent.getInstance();
         // finder = ResoureFinder.getInstance(context);
     }
 
@@ -387,6 +391,17 @@ public class EUExImage extends EUExBase {
         performCrop(file);
     }
 
+    public void compressImage(String[] params) {
+        if (params.length >= 1) {
+            String imageVOStr = params[0];
+            CompressImageVO mCompressImageVO = DataHelper.gson
+                    .fromJson(imageVOStr, CompressImageVO.class);
+            mCompressImageVO.setSrcPath(BUtility
+                    .makeRealPath(mCompressImageVO.getSrcPath(), mBrwView));
+            mEuExImageAgent.compressImage(this, mCompressImageVO);
+        }
+    }
+
     private void performCrop(File imageFile) {
         try {
 
@@ -682,7 +697,7 @@ public class EUExImage extends EUExBase {
             file.delete();
         }
         try {
-            jsonResult.put("status", "ok");
+            jsonResult.put(Constants.JK_STATUSE, Constants.JK_OK);
         } catch (JSONException e) {
             Log.i(TAG, e.getMessage());
         }
@@ -692,6 +707,10 @@ public class EUExImage extends EUExBase {
 
     public void onImageLongClick(String cbVO) {
         callBackPluginJs(JsConst.CALLBACK_ON_IAMGE_LONG_CLICKED, cbVO);
+    }
+
+    public void cbCompressImage(String cbVO) {
+        callBackPluginJs(JsConst.CALLBACK_COMPRESS_IAMGE, cbVO);
     }
 
     private void callBackPluginJs(String methodName, String jsonData) {

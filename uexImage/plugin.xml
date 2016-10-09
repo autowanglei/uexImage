@@ -8,5 +8,6 @@
         <method name="openCropper" />
         <method name="clearOutputImages" />
         <method name="saveToPhotoAlbum" />
+        <method name="compressImage" />
     </plugin>
 </uexplugins>

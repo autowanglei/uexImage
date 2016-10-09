@@ -25,4 +25,5 @@ public class JsConst {
     public static final String CALLBACK_SAVE_TO_PHOTO_ALBUM = "uexImage.cbSaveToPhotoAlbum";
     public static final String CALLBACK_CLEAR_OUTPUT_IMAGES = "uexImage.cbClearOutputImages";
     public static final String CALLBACK_ON_IAMGE_LONG_CLICKED = "uexImage.onImageLongClicked";
+    public static final String CALLBACK_COMPRESS_IAMGE = "uexImage.cbCompressImage";
 }

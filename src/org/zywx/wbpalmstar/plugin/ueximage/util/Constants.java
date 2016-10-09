@@ -69,4 +69,23 @@ public class Constants {
     public static final String GRID_BROWSER_TITLE = "gridBrowserTitle";
     public static final String DEF_GRID_VIEW_BG_COLOR = "#000000";
     public static final String LONG_CLICK_CB_IMAGE_PATH = "imagePath";
+
+    /** 压缩图片使用 */
+    public static final int DES_FILE_LENGTH_10K = 10 * 1024;
+    public static final int HEIGHT_10K = 240;
+    public static final int WIDTH_10K = 320;
+    public static final int DES_FILE_LENGTH_30K = 30 * 1024;
+    public static final int HEIGHT_30K = 480;
+    public static final int WIDTH_30K = 800;
+    public static final int DES_FILE_LENGTH_100K = 100 * 1024;
+    public static final int HEIGHT_100K = 720;
+    public static final int WIDTH_100K = 1080;
+    public static final String SRC_PATH = "srcPath";
+    public static final String DES_PATH = "desPath";
+    public static final String DES_LENGTH = "desLength";
+    public static final String JK_STATUSE = "status";
+    public static final String JK_FILE_PATH = "filePath";
+    public static final String JK_OK = "ok";
+    public static final String JK_FAIL = "fail";
+    public static final String COMPRESS_TEMP_FILE_HEARD = "compress_temp_";
 }

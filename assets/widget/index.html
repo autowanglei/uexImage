@@ -129,6 +129,15 @@
 		var data = JSON.stringify(params);
 		uexImage.clearOutputImages(data);
 	}
+	
+	function compressImage() {
+        var params = {
+                srcPath : "/storage/emulated/0/DCIM/Camera/20161009_165219.jpg",
+                desLength : 30*1024
+        };
+        var data = JSON.stringify(params);
+        uexImage.compressImage(data);
+	}
 
 	window.uexOnload = function(type) {
 		if (type == 0) {
@@ -138,6 +147,7 @@
 			uexImage.cbSaveToPhotoAlbum = cbSaveToPhotoAlbum;
 			uexImage.cbClearOutputImages = cbClearOutputImages;
 			uexImage.onImageLongClicked = onImageLongClicked;
+			uexImage.cbCompressImage = cbCompressImage;
 		}
 	}
 
@@ -149,6 +159,9 @@
 	
 	function cbOpenPicker(info) {
 	    alert("cbOpenPicker:" + info);
+	}
+	function cbCompressImage(info) {
+	    alert("cbCompressImage:" + info);
 	}
 	function onPickerClosed(info) {
 		alert("onPickerClosed:" + info);
@@ -196,6 +209,8 @@
         <input class='btn' type='button' value='saveToPhotoAlbum' onclick='saveToPhotoAlbum();'>
         <span>5.清除由本插件导出的所有图片</span>
         <input class='btn' type='button' value='clearOutputImages' onclick='clearOutputImages();'>
+        <span>6.压缩图片</span>
+        <input class='btn' type='button' value='compressImage' onclick='compressImage();'>
     </div>
 </div>
 </body>
