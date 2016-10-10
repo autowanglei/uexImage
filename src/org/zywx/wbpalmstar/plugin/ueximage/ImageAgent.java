@@ -20,14 +20,15 @@ import android.os.Environment;
 public class ImageAgent {
     private static ImageAgent mImageAgent = null;
 
-    public ImageAgent() {
+    private ImageAgent() {
     }
 
     public static ImageAgent getInstance() {
-        if (mImageAgent == null) {
-            mImageAgent = new ImageAgent();
-        }
-        return mImageAgent;
+        return ImageAgentHolder.sInstance;
+    }
+
+    private static class ImageAgentHolder {
+        private static final ImageAgent sInstance = new ImageAgent();
     }
 
     public void compressImage(EUExImage mEuExImage,
