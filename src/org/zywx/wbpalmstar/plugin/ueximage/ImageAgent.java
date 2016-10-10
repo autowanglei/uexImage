@@ -17,17 +17,17 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 
-public class EUExImageAgent {
-    private static EUExImageAgent mEuExImageAgent = null;
+public class ImageAgent {
+    private static ImageAgent mImageAgent = null;
 
-    public EUExImageAgent() {
+    public ImageAgent() {
     }
 
-    public static EUExImageAgent getInstance() {
-        if (mEuExImageAgent == null) {
-            mEuExImageAgent = new EUExImageAgent();
+    public static ImageAgent getInstance() {
+        if (mImageAgent == null) {
+            mImageAgent = new ImageAgent();
         }
-        return mEuExImageAgent;
+        return mImageAgent;
     }
 
     public void compressImage(EUExImage mEuExImage,

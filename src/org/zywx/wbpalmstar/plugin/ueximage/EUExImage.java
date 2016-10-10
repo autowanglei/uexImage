@@ -69,7 +69,7 @@ public class EUExImage extends EUExBase {
     // private ResoureFinder finder;
     /** * 保存添加到网页的view */
     private static ConcurrentHashMap<String, View> addToWebViewsMap = new ConcurrentHashMap<String, View>();
-    private EUExImageAgent mEuExImageAgent = null;
+    private ImageAgent mImageAgent = null;
 
     public EUExImage(Context context, EBrowserView eBrowserView) {
         super(context, eBrowserView);
@@ -82,7 +82,7 @@ public class EUExImage extends EUExBase {
         }
         CommonUtil.initImageLoader(context);
         uexImageUtil = UEXImageUtil.getInstance();
-        mEuExImageAgent = EUExImageAgent.getInstance();
+        mImageAgent = ImageAgent.getInstance();
         // finder = ResoureFinder.getInstance(context);
     }
 
@@ -398,7 +398,7 @@ public class EUExImage extends EUExBase {
                     .fromJson(imageVOStr, CompressImageVO.class);
             mCompressImageVO.setSrcPath(BUtility
                     .makeRealPath(mCompressImageVO.getSrcPath(), mBrwView));
-            mEuExImageAgent.compressImage(this, mCompressImageVO);
+            mImageAgent.compressImage(this, mCompressImageVO);
         }
     }
 
