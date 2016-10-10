@@ -87,5 +87,6 @@ public class Constants {
     public static final String JK_FILE_PATH = "filePath";
     public static final String JK_OK = "ok";
     public static final String JK_FAIL = "fail";
-    public static final String COMPRESS_TEMP_FILE_HEARD = "compress_temp_";
+    public static final String COMPRESS_TEMP_FILE_PREFIX = "compress_temp_";
+    public static final String COMPRESS_TEMP_FILE_SUFFIX = "jpg";
 }

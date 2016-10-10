@@ -37,7 +37,8 @@ public class EUExImageAgent {
 
         String desPath = Environment.getExternalStorageDirectory()
                 + File.separator + UEXImageUtil.TEMP_PATH + File.separator
-                + Constants.COMPRESS_TEMP_FILE_HEARD + new Date().getTime();
+                + Constants.COMPRESS_TEMP_FILE_PREFIX + new Date().getTime()
+                + "." + Constants.COMPRESS_TEMP_FILE_SUFFIX;
         new File(desPath);
         int desLength = mCompressImageVO.getDesLength();
 
