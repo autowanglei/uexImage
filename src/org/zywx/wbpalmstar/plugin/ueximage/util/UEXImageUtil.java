@@ -345,6 +345,7 @@ public class UEXImageUtil {
         viewFrameVO.height = (int) Math.ceil(
                 (contextView.getMeasuredHeight() - getStatusBarHeight(context))
                         / nowScale);
+        viewFrameVO.isWebParam = false;
         return viewFrameVO;
     }
 
