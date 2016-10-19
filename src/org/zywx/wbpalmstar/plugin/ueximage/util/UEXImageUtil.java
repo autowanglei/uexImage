@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -327,14 +329,47 @@ public class UEXImageUtil {
         return imageDataList;
     }
 
-    public static ViewFrameVO getFullScreenViewFrameVO(Context context,
-            EBrowserView mBrwView) {
-        ViewFrameVO viewFrameVO = new ViewFrameVO();
+    /**
+     * getCustomScale：引擎中添加的获取x5内核网页scale的方法，为兼容旧引擎，故使用反射调用
+     * 
+     * @param mBrwView
+     * @return
+     */
+    private static float getWebScale(EBrowserView mBrwView) {
+        float scale = 1.0f;
+        try {
+            Method gatScale = EBrowserView.class.getMethod("getCustomScale",
+                    null);
+            try {
+                scale = (Float) gatScale.invoke(mBrwView, null);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            scale = getWebScaleOld(mBrwView);
+        }
+
+        return scale;
+    }
+
+    private static float getWebScaleOld(EBrowserView mBrwView) {
         float nowScale = 1.0f;
         int versionA = Build.VERSION.SDK_INT;
         if (versionA <= 18) {
             nowScale = mBrwView.getScale();
         }
+        return nowScale;
+    }
+
+    public static ViewFrameVO getFullScreenViewFrameVO(Context context,
+            EBrowserView mBrwView) {
+        ViewFrameVO viewFrameVO = new ViewFrameVO();
+        float nowScale = getWebScale(mBrwView);
         final View contextView = ((Activity) context).getWindow()
                 .getDecorView();
         viewFrameVO = new ViewFrameVO();
@@ -345,7 +380,6 @@ public class UEXImageUtil {
         viewFrameVO.height = (int) Math.ceil(
                 (contextView.getMeasuredHeight() - getStatusBarHeight(context))
                         / nowScale);
-        viewFrameVO.isWebParam = false;
         return viewFrameVO;
     }
 

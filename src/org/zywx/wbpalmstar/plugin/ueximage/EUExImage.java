@@ -52,9 +52,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -304,29 +302,6 @@ public class EUExImage extends EUExBase {
         return viewFrameVO;
     }
 
-    /**
-     * 添加一个view覆盖到当前window中.
-     *
-     * @param child
-     * @param parms
-     */
-    public final void addView2CurrentWindow(View child,
-            RelativeLayout.LayoutParams parms) {
-        if (null == mBrwView) {
-            return;
-        }
-        int l = (int) (parms.leftMargin);
-        int t = (int) (parms.topMargin);
-        int w = parms.width;
-        int h = parms.height;
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(w, h);
-        lp.gravity = Gravity.NO_GRAVITY;
-        lp.leftMargin = l;
-        lp.topMargin = t;
-        adptLayoutParams(parms, lp);
-        mBrwView.addViewToCurrentWindow(child, lp);
-    }
-
     public void openCropper(String[] params) {
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
@@ -472,11 +447,7 @@ public class EUExImage extends EUExBase {
         if (addToWebViewsMap.get(tag) != null) {
             removeViewFromCurWindow(tag);
         }
-        if (viewFrameVO.isWebParam) {
-            addViewToCurrentWindow(view, lp);
-        } else {
-            addView2CurrentWindow(view, lp);
-        }
+        addViewToCurrentWindow(view, lp);
         addToWebViewsMap.put(tag, view);
     }
 
