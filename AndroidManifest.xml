@@ -60,11 +60,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".AlbumListActivity"
-            android:theme="@style/plugin_uex_image_appTheme" >
-        </activity>
-        <activity android:name="org.zywx.wbpalmstar.plugin.ueximage.AlbumListActivity"/>
         <activity android:name="org.zywx.wbpalmstar.plugin.ueximage.crop.CropImageActivity"/>
     </application>
 

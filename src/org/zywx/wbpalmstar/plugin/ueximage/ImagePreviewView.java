@@ -38,7 +38,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.PagerAdapter;
@@ -57,7 +56,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ImagePreviewActivity extends ImageBaseView {
+public class ImagePreviewView extends ImageBaseView {
 
     public final static String TAG = "ImagePreviewView";
     private ViewPager viewPager;
@@ -108,264 +107,11 @@ public class ImagePreviewActivity extends ImageBaseView {
             if (mRequestCode == Constants.REQUEST_IMAGE_BROWSER_FROM_GRID) {
                 finish(TAG, Constants.OPERATION_CANCELLED);
             } else {
-                startPictureGridActivity(mContext, mEUExImage, "",
+                startPictureGridView(mContext, mEUExImage, "",
                         Constants.REQUEST_IMAGE_BROWSER);
             }
         }
     };
-
-    /**
-     * @param context
-     * @param mEUExImage
-     * @param folderName
-     *            isOpenBrowser为false时，才使用此值
-     * @param picIndex
-     *            isOpenBrowser为false时，才使用此值
-     * @param requestCode
-     *            this code will be returned in finish() when the view exits.
-     */
-    public ImagePreviewActivity(Context context, EUExImage mEUExImage,
-            String folderName, int picIndex, int requestCode,
-            ViewEvent viewEvent) {
-        super(context, mEUExImage, requestCode, viewEvent, TAG);
-        mContext = context;
-        onCreate(context, folderName, picIndex);
-        mImagePreviewActivity = this;
-    }
-
-    private void onCreate(Context context, String folderName, int picIndex) {
-        LayoutInflater.from(context)
-                .inflate(
-                        EUExUtil.getResLayoutID(
-                                "plugin_uex_image_activity_image_preview"),
-                        this, true);
-        uexImageUtil = UEXImageUtil.getInstance();
-        isOpenBrowser = EUEXImageConfig.getInstance().getIsOpenBrowser();
-        rlTitle = (RelativeLayout) findViewById(
-                EUExUtil.getResIdID("title_layout"));
-        ivGoBack = (ImageView) findViewById(
-                EUExUtil.getResIdID("iv_left_on_title"));
-        tvTitle = (TextView) findViewById(EUExUtil.getResIdID("tv_title"));
-        ivToGrid = (ImageView) findViewById(EUExUtil.getResIdID("iv_to_grid"));
-        btnFinishInTitle = (Button) findViewById(
-                EUExUtil.getResIdID("btn_finish_title"));
-        viewPager = (ViewPager) findViewById(EUExUtil.getResIdID("vp_picture"));
-        cbChoose = (CheckBox) findViewById(EUExUtil.getResIdID("checkbox"));
-        rlBottom = (RelativeLayout) findViewById(
-                EUExUtil.getResIdID("rl_bottom"));
-        rlTitle.setAlpha(0.9f);
-        rlBottom.setAlpha(0.9f);
-
-        initData(folderName, picIndex);
-        if (isOpenBrowser) {
-            initViewForBrowser(context);
-        } else {
-            initViewForPicker(context);
-        }
-        initAnimation();
-    }
-
-    private void initData(String folder, int index) {
-        if (isOpenBrowser) {
-            JSONArray imageDataArray = EUEXImageConfig.getInstance()
-                    .getDataArray();
-            picList = uexImageUtil.transformData(imageDataArray);
-            picIndex = EUEXImageConfig.getInstance().getStartIndex();
-        } else {
-            folderName = folder;
-            picIndex = index;
-            checkedItems = uexImageUtil.getCheckedItems();
-            picList = uexImageUtil.getCurrentPicList();
-        }
-    }
-
-    private void initViewForPicker(final Context context) {
-        tvTitle.setText(folderName);
-        ivGoBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish(TAG, Constants.OPERATION_CANCELLED);
-            }
-        });
-        viewPager.setAdapter(adapter);
-        viewPager.setCurrentItem(picIndex);
-        viewPager.setOnPageChangeListener(onPageChangeListener);
-        if (checkedItems.size() > 0) {
-            btnFinishInTitle
-                    .setText(EUExUtil.getString("plugin_uex_image_crop_done")
-                            + "(" + checkedItems.size() + "/"
-                            + EUEXImageConfig.getInstance().getMaxImageCount()
-                            + ")");
-            btnFinishInTitle.setEnabled(true);
-        }
-        PictureInfo pictureInfo = picList.get(picIndex);
-        cbChoose.setTag(pictureInfo.getSrc());
-        cbChoose.setChecked(checkedItems.contains(pictureInfo.getSrc()));
-        cbChoose.setOnCheckedChangeListener(onCheckedChangeListener);
-        btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (checkedItems.size() >= EUEXImageConfig.getInstance()
-                        .getMinImageCount()) {
-                    // setResult(RESULT_OK, null);
-                    finish(TAG, Constants.OPERATION_CONFIRMED);
-                } else {
-                    String str = String.format(
-                            EUExUtil.getString(
-                                    "plugin_uex_image_at_least_choose"),
-                            EUEXImageConfig.getInstance().getMinImageCount());
-                    Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-        case MotionEvent.ACTION_UP:
-            if ((Constants.UI_STYLE_NEW == EUEXImageConfig.getInstance()
-                    .getUIStyle()) && (ivToGrid != null)) {
-                showIvToGridDelayed();
-                if (hideIvToGridHandler
-                        .hasMessages(Constants.WHAT_HIDE_IV_TO_GRID)) {
-                    hideIvToGridHandler
-                            .removeMessages(Constants.WHAT_HIDE_IV_TO_GRID);
-                }
-                hideIvToGridDelayed();
-            }
-            break;
-        }
-        return super.dispatchTouchEvent(event);
-    }
-
-    private void startPictureGridActivity(Context context, EUExImage euExImage,
-            String filePath, int requestCode) {
-        // 由起始的单图浏览进入多图浏览，没有pick的情况
-        // finish(TAG, Constants.OPERATION_CANCELLED);
-        View imagePreviewView = new PictureGridActivity(context, euExImage, "",
-                requestCode, new ViewEvent() {
-                    @Override
-                    public void resultCallBack(int requestCode,
-                            int resultCode) {
-                        mImagePreviewActivity.requestViewFocus();
-                    }
-                });
-        euExImage.addViewToCurrentWindow(imagePreviewView, PictureGridActivity.TAG,
-                EUEXImageConfig.getInstance().getPicGridFrame());
-    }
-
-    private void initViewForBrowser(final Context context) {
-
-        ivGoBack.setVisibility(View.INVISIBLE);
-        tvCheckbox = (TextView) findViewById(
-                EUExUtil.getResIdID("tv_checkbox"));
-        cbChoose.setVisibility(View.INVISIBLE);
-        tvCheckbox.setVisibility(View.INVISIBLE);
-
-        switch (EUEXImageConfig.getInstance().getUIStyle()) {
-        case Constants.UI_STYLE_OLD:
-            tvShare = (TextView) findViewById(EUExUtil.getResIdID("tv_share"));
-            tvToGrid = (TextView) findViewById(
-                    EUExUtil.getResIdID("tv_to_grid"));
-            tvToGrid.setVisibility(View.VISIBLE);
-            tvToGrid.setOnClickListener(toGridClickListener);
-
-            btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    // setResult(RESULT_OK, null);
-                    finish(TAG, Constants.OPERATION_CONFIRMED);
-                }
-            });
-            if (EUEXImageConfig.getInstance().isDisplayActionButton()) {
-                tvShare.setVisibility(View.VISIBLE);
-                tvShare.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View view) {
-                        final String src = picList.get(picIndex).getSrc();
-                        Bitmap bitmap;
-                        if (src.substring(0, 4)
-                                .equalsIgnoreCase(Constants.HTTP)) {
-                            bitmap = ImageLoader.getInstance()
-                                    .loadImageSync(src);
-                        } else {
-                            bitmap = CommonUtil.getLocalImage(context, src);
-                        }
-                        File file = new File(
-                                Environment.getExternalStorageDirectory(),
-                                File.separator + UEXImageUtil.TEMP_PATH
-                                        + File.separator
-                                        + "uex_image_to_share.jpg");
-                        if (bitmap == null) {
-                            Toast.makeText(context,
-                                    EUExUtil.getString(
-                                            "plugin_uex_image_retry_load_image"),
-                                    Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        if (CommonUtil.saveBitmap2File(bitmap, file)) {
-                            Intent shareIntent = new Intent();
-                            shareIntent.setAction(Intent.ACTION_SEND);
-                            shareIntent.putExtra(Intent.EXTRA_STREAM,
-                                    Uri.fromFile(file));
-                            shareIntent.setType("image/*");
-                            // startActivity(
-                        } else {
-                            Toast.makeText(context,
-                                    EUExUtil.getString(
-                                            "plugin_uex_image_image_error"),
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            } else {
-                if (!EUEXImageConfig.getInstance().isEnableGrid()) {
-                    ((View) tvShare.getParent()).setVisibility(View.INVISIBLE);
-                }
-            }
-            break;
-        case Constants.UI_STYLE_NEW:
-            rlTitle.setVisibility(View.GONE);
-            rlBottom.setVisibility(View.GONE);
-            ivToGrid.setVisibility(View.VISIBLE);
-            ivToGrid.setOnClickListener(toGridClickListener);
-            hideIvToGridDelayed();
-            break;
-        default:
-            BDebug.e(TAG, "EUExImage UIStyle is error.");
-            break;
-        }
-        viewPager.setAdapter(adapter);
-        viewPager.setCurrentItem(picIndex);
-        viewPager.setOnPageChangeListener(onPageChangeListener);
-    }
-
-    private void showIvToGridDelayed() {
-        hideIvToGridHandler.sendEmptyMessageDelayed(
-                Constants.WHAT_SHOW_IV_TO_GRID,
-                Constants.SHOW_IV_TO_GRID_TIMEOUT);
-    }
-
-    private void hideIvToGridDelayed() {
-        hideIvToGridHandler.sendEmptyMessageDelayed(
-                Constants.WHAT_HIDE_IV_TO_GRID,
-                Constants.HIDE_IV_TO_GRID_TIMEOUT);
-    }
-
-    @Override
-    protected void onResume() {
-        if (!isOpenBrowser) {
-            cbChoose.setChecked(checkedItems.contains(picList.get(picIndex)));
-        }
-        if (1 == picList.size()) {
-            tvTitle.setText("1" + "/" + picList.size());
-        } else {
-            tvTitle.setText((picIndex + 1) + "/" + picList.size());
-        }
-    }
 
     private PagerAdapter adapter = new PagerAdapter() {
 
@@ -449,7 +195,6 @@ public class ImagePreviewActivity extends ImageBaseView {
                     hideIvToGridHandler
                             .removeMessages(Constants.WHAT_SHOW_IV_TO_GRID);
                 }
-                // setResult(RESULT_OK, null);
                 finish(TAG, Constants.OPERATION_CANCELLED);
                 break;
             default:
@@ -457,32 +202,6 @@ public class ImagePreviewActivity extends ImageBaseView {
             }
         }
     };
-
-    private void toogleView() {
-        if (rlTitle.getVisibility() == View.VISIBLE) {
-            rlTitle.setVisibility(View.INVISIBLE);
-            rlTitle.startAnimation(fadeOutAnim);
-            rlBottom.setVisibility(View.INVISIBLE);
-            rlBottom.startAnimation(fadeOutAnim);
-        } else {
-            rlTitle.setVisibility(View.VISIBLE);
-            rlTitle.startAnimation(fadeInAnim);
-            rlBottom.setVisibility(View.VISIBLE);
-            rlBottom.startAnimation(fadeInAnim);
-        }
-    }
-
-    private void initAnimation() {
-        final int duration = 300;
-        LinearInterpolator interpolator = new LinearInterpolator();
-        fadeInAnim = new AlphaAnimation(0, 1);
-        fadeInAnim.setDuration(duration);
-        fadeInAnim.setInterpolator(interpolator);
-
-        fadeOutAnim = new AlphaAnimation(1, 0);
-        fadeOutAnim.setDuration(duration);
-        fadeOutAnim.setInterpolator(interpolator);
-    }
 
     private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
         @Override
@@ -516,6 +235,7 @@ public class ImagePreviewActivity extends ImageBaseView {
             }
         }
     };
+
     // 仅当在选择图片时才会用得上
     private CheckBox.OnCheckedChangeListener onCheckedChangeListener = new CheckBox.OnCheckedChangeListener() {
 
@@ -557,4 +277,278 @@ public class ImagePreviewActivity extends ImageBaseView {
             }
         }
     };
+
+    /**
+     * @param context
+     * @param mEUExImage
+     * @param folderName
+     *            isOpenBrowser为false时，才使用此值
+     * @param picIndex
+     *            isOpenBrowser为false时，才使用此值
+     * @param requestCode
+     *            this code will be returned in finish() when the view exits.
+     */
+    public ImagePreviewView(Context context, EUExImage mEUExImage,
+            String folderName, int picIndex, int requestCode,
+            ViewEvent viewEvent) {
+        super(context, mEUExImage, requestCode, viewEvent, TAG);
+        mContext = context;
+        onCreate(context, folderName, picIndex);
+        mImagePreviewActivity = this;
+    }
+
+    private void onCreate(Context context, String folderName, int picIndex) {
+        LayoutInflater.from(context)
+                .inflate(
+                        EUExUtil.getResLayoutID(
+                                "plugin_uex_image_activity_image_preview"),
+                        this, true);
+        uexImageUtil = UEXImageUtil.getInstance();
+        isOpenBrowser = EUEXImageConfig.getInstance().getIsOpenBrowser();
+        rlTitle = (RelativeLayout) findViewById(
+                EUExUtil.getResIdID("title_layout"));
+        ivGoBack = (ImageView) findViewById(
+                EUExUtil.getResIdID("iv_left_on_title"));
+        tvTitle = (TextView) findViewById(EUExUtil.getResIdID("tv_title"));
+        ivToGrid = (ImageView) findViewById(EUExUtil.getResIdID("iv_to_grid"));
+        btnFinishInTitle = (Button) findViewById(
+                EUExUtil.getResIdID("btn_finish_title"));
+        viewPager = (ViewPager) findViewById(EUExUtil.getResIdID("vp_picture"));
+        cbChoose = (CheckBox) findViewById(EUExUtil.getResIdID("checkbox"));
+        rlBottom = (RelativeLayout) findViewById(
+                EUExUtil.getResIdID("rl_bottom"));
+        rlTitle.setAlpha(0.9f);
+        rlBottom.setAlpha(0.9f);
+
+        initData(folderName, picIndex);
+        if (isOpenBrowser) {
+            initViewForBrowser(context);
+        } else {
+            initViewForPicker(context);
+        }
+        initAnimation();
+    }
+
+    private void initData(String folder, int index) {
+        if (isOpenBrowser) {
+            JSONArray imageDataArray = EUEXImageConfig.getInstance()
+                    .getDataArray();
+            picList = uexImageUtil.transformData(imageDataArray);
+            picIndex = EUEXImageConfig.getInstance().getStartIndex();
+        } else {
+            folderName = folder;
+            picIndex = index;
+            checkedItems = uexImageUtil.getCheckedItems();
+            picList = uexImageUtil.getCurrentPicList();
+        }
+    }
+
+    private void initViewForPicker(final Context context) {
+        tvTitle.setText(folderName);
+        ivGoBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish(TAG, Constants.OPERATION_CANCELLED);
+            }
+        });
+        viewPager.setAdapter(adapter);
+        viewPager.setCurrentItem(picIndex);
+        viewPager.setOnPageChangeListener(onPageChangeListener);
+        if (checkedItems.size() > 0) {
+            btnFinishInTitle
+                    .setText(EUExUtil.getString("plugin_uex_image_crop_done")
+                            + "(" + checkedItems.size() + "/"
+                            + EUEXImageConfig.getInstance().getMaxImageCount()
+                            + ")");
+            btnFinishInTitle.setEnabled(true);
+        }
+        PictureInfo pictureInfo = picList.get(picIndex);
+        cbChoose.setTag(pictureInfo.getSrc());
+        cbChoose.setChecked(checkedItems.contains(pictureInfo.getSrc()));
+        cbChoose.setOnCheckedChangeListener(onCheckedChangeListener);
+        btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (checkedItems.size() >= EUEXImageConfig.getInstance()
+                        .getMinImageCount()) {
+                    finish(TAG, Constants.OPERATION_CONFIRMED);
+                } else {
+                    String str = String.format(
+                            EUExUtil.getString(
+                                    "plugin_uex_image_at_least_choose"),
+                            EUEXImageConfig.getInstance().getMinImageCount());
+                    Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+        case MotionEvent.ACTION_UP:
+            if ((Constants.UI_STYLE_NEW == EUEXImageConfig.getInstance()
+                    .getUIStyle()) && (ivToGrid != null)) {
+                showIvToGridDelayed();
+                if (hideIvToGridHandler
+                        .hasMessages(Constants.WHAT_HIDE_IV_TO_GRID)) {
+                    hideIvToGridHandler
+                            .removeMessages(Constants.WHAT_HIDE_IV_TO_GRID);
+                }
+                hideIvToGridDelayed();
+            }
+            break;
+        }
+        return super.dispatchTouchEvent(event);
+    }
+
+    private void startPictureGridView(Context context, EUExImage euExImage,
+            String filePath, int requestCode) {
+        // 由起始的单图浏览进入多图浏览，没有pick的情况
+        View imagePreviewView = new PictureGridView(context, euExImage, "",
+                requestCode, new ViewEvent() {
+                    @Override
+                    public void resultCallBack(int requestCode,
+                            int resultCode) {
+                        mImagePreviewActivity.requestViewFocus();
+                    }
+                });
+        euExImage.addViewToCurrentWindow(imagePreviewView, PictureGridView.TAG,
+                EUEXImageConfig.getInstance().getPicGridFrame());
+    }
+
+    private void initViewForBrowser(final Context context) {
+
+        ivGoBack.setVisibility(View.INVISIBLE);
+        tvCheckbox = (TextView) findViewById(
+                EUExUtil.getResIdID("tv_checkbox"));
+        cbChoose.setVisibility(View.INVISIBLE);
+        tvCheckbox.setVisibility(View.INVISIBLE);
+
+        switch (EUEXImageConfig.getInstance().getUIStyle()) {
+        case Constants.UI_STYLE_OLD:
+            tvShare = (TextView) findViewById(EUExUtil.getResIdID("tv_share"));
+            tvToGrid = (TextView) findViewById(
+                    EUExUtil.getResIdID("tv_to_grid"));
+            tvToGrid.setVisibility(View.VISIBLE);
+            tvToGrid.setOnClickListener(toGridClickListener);
+
+            btnFinishInTitle.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    finish(TAG, Constants.OPERATION_CONFIRMED);
+                }
+            });
+            if (EUEXImageConfig.getInstance().isDisplayActionButton()) {
+                tvShare.setVisibility(View.VISIBLE);
+                tvShare.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        final String src = picList.get(picIndex).getSrc();
+                        Bitmap bitmap;
+                        if (src.substring(0, 4)
+                                .equalsIgnoreCase(Constants.HTTP)) {
+                            bitmap = ImageLoader.getInstance()
+                                    .loadImageSync(src);
+                        } else {
+                            bitmap = CommonUtil.getLocalImage(context, src);
+                        }
+                        File file = new File(
+                                UEXImageUtil.getImageCacheDir(context)
+                                        + File.separator
+                                        + "uex_image_to_share.jpg");
+                        if (bitmap == null) {
+                            Toast.makeText(context,
+                                    EUExUtil.getString(
+                                            "plugin_uex_image_retry_load_image"),
+                                    Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (CommonUtil.saveBitmap2File(bitmap, file)) {
+                            Intent shareIntent = new Intent();
+                            shareIntent.setAction(Intent.ACTION_SEND);
+                            shareIntent.putExtra(Intent.EXTRA_STREAM,
+                                    Uri.fromFile(file));
+                            shareIntent.setType("image/*");
+                        } else {
+                            Toast.makeText(context,
+                                    EUExUtil.getString(
+                                            "plugin_uex_image_image_error"),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            } else {
+                if (!EUEXImageConfig.getInstance().isEnableGrid()) {
+                    ((View) tvShare.getParent()).setVisibility(View.INVISIBLE);
+                }
+            }
+            break;
+        case Constants.UI_STYLE_NEW:
+            rlTitle.setVisibility(View.GONE);
+            rlBottom.setVisibility(View.GONE);
+            ivToGrid.setVisibility(View.VISIBLE);
+            ivToGrid.setOnClickListener(toGridClickListener);
+            hideIvToGridDelayed();
+            break;
+        default:
+            BDebug.e(TAG, "EUExImage UIStyle is error.");
+            break;
+        }
+        viewPager.setAdapter(adapter);
+        viewPager.setCurrentItem(picIndex);
+        viewPager.setOnPageChangeListener(onPageChangeListener);
+    }
+
+    private void showIvToGridDelayed() {
+        hideIvToGridHandler.sendEmptyMessageDelayed(
+                Constants.WHAT_SHOW_IV_TO_GRID,
+                Constants.SHOW_IV_TO_GRID_TIMEOUT);
+    }
+
+    private void hideIvToGridDelayed() {
+        hideIvToGridHandler.sendEmptyMessageDelayed(
+                Constants.WHAT_HIDE_IV_TO_GRID,
+                Constants.HIDE_IV_TO_GRID_TIMEOUT);
+    }
+
+    @Override
+    protected void onResume() {
+        if (!isOpenBrowser) {
+            cbChoose.setChecked(checkedItems.contains(picList.get(picIndex)));
+        }
+        if (1 == picList.size()) {
+            tvTitle.setText("1" + "/" + picList.size());
+        } else {
+            tvTitle.setText((picIndex + 1) + "/" + picList.size());
+        }
+    }
+
+    private void toogleView() {
+        if (rlTitle.getVisibility() == View.VISIBLE) {
+            rlTitle.setVisibility(View.INVISIBLE);
+            rlTitle.startAnimation(fadeOutAnim);
+            rlBottom.setVisibility(View.INVISIBLE);
+            rlBottom.startAnimation(fadeOutAnim);
+        } else {
+            rlTitle.setVisibility(View.VISIBLE);
+            rlTitle.startAnimation(fadeInAnim);
+            rlBottom.setVisibility(View.VISIBLE);
+            rlBottom.startAnimation(fadeInAnim);
+        }
+    }
+
+    private void initAnimation() {
+        final int duration = 300;
+        LinearInterpolator interpolator = new LinearInterpolator();
+        fadeInAnim = new AlphaAnimation(0, 1);
+        fadeInAnim.setDuration(duration);
+        fadeInAnim.setInterpolator(interpolator);
+
+        fadeOutAnim = new AlphaAnimation(1, 0);
+        fadeOutAnim.setDuration(duration);
+        fadeOutAnim.setInterpolator(interpolator);
+    }
 }

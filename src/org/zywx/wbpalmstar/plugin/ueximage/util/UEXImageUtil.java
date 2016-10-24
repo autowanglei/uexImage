@@ -78,9 +78,7 @@ public class UEXImageUtil {
 
     // 当前正在操作的图片集合
     private List<PictureInfo> currentPicList = new ArrayList<PictureInfo>();
-
-    // 图片临时保存的位置
-    public static final String TEMP_PATH = "uex_image_temp";
+    private static String imageCacheDir = "";
 
     private UEXImageUtil() {
     }
@@ -195,13 +193,13 @@ public class UEXImageUtil {
             String orginPicPath = ImageFilePath.getPath(context,
                     Uri.parse(picPath));
             if (EUEXImageConfig.getInstance().getIsUsePng()) {
-                f = new File(Environment.getExternalStorageDirectory(),
-                        File.separator + TEMP_PATH + File.separator + "temp_"
-                                + new Date().getTime() + ".png");
+                f = new File(
+                        UEXImageUtil.getImageCacheDir(context) + File.separator
+                                + "temp_" + new Date().getTime() + ".png");
             } else {
-                f = new File(Environment.getExternalStorageDirectory(),
-                        File.separator + TEMP_PATH + File.separator + "temp_"
-                                + new Date().getTime() + ".jpg");
+                f = new File(
+                        UEXImageUtil.getImageCacheDir(context) + File.separator
+                                + "temp_" + new Date().getTime() + ".jpg");
             }
             try {
                 f.createNewFile();
@@ -420,5 +418,44 @@ public class UEXImageUtil {
             break;
         }
         return mPicSizeVO;
+    }
+
+    /**
+     * 用于保证能够得到一个缓存目录 by yipeng
+     * 
+     * @param context
+     * @return
+     */
+    private static File getExternalCacheDir(Context context) {
+        File path = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+            path = context.getExternalCacheDir();
+            // In some case, even the sd card is mounted,
+            // getExternalCacheDir will return null
+            // may be it is nearly full.
+        }
+        if (null == path) {
+            // Before Froyo or the path is null,
+            // we need to construct the external cache folder ourselves
+            final String cacheDir = "/Android/data/" + context.getPackageName()
+                    + "/cache/";
+            path = new File(Environment.getExternalStorageDirectory().getPath()
+                    + cacheDir);
+        }
+        return path;
+    }
+
+    public static String getImageCacheDir(Context context) {
+        if (TextUtils.isEmpty(imageCacheDir)) {
+            String cacheDir = "";
+            if (android.os.Environment.getExternalStorageState()
+                    .equals(android.os.Environment.MEDIA_MOUNTED)) {
+                cacheDir = getExternalCacheDir(context).getAbsolutePath();
+            } else {
+                cacheDir = context.getFilesDir().getAbsolutePath();
+            }
+            imageCacheDir = cacheDir + File.separator + Constants.TEMP_PATH;
+        }
+        return imageCacheDir;
     }
 }

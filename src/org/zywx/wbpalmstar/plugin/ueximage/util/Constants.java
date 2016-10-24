@@ -89,4 +89,7 @@ public class Constants {
     public static final String JK_FAIL = "fail";
     public static final String COMPRESS_TEMP_FILE_PREFIX = "compress_temp_";
     public static final String COMPRESS_TEMP_FILE_SUFFIX = "jpg";
+    // 图片临时保存的位置
+    public static final String TEMP_PATH = "uex_image_temp";
+    public static final String NO_MEDIA = ".nomedia";
 }

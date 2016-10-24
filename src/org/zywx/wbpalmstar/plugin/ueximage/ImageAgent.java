@@ -13,6 +13,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.vo.CompressImageVO;
 import org.zywx.wbpalmstar.plugin.ueximage.vo.PicSizeVO;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
@@ -31,13 +32,12 @@ public class ImageAgent {
         private static final ImageAgent sInstance = new ImageAgent();
     }
 
-    public void compressImage(EUExImage mEuExImage,
+    public void compressImage(Context context, EUExImage mEuExImage,
             CompressImageVO mCompressImageVO) {
         String status = Constants.JK_OK;
         String srcPath = mCompressImageVO.getSrcPath();
 
-        String desPath = Environment.getExternalStorageDirectory()
-                + File.separator + UEXImageUtil.TEMP_PATH + File.separator
+        String desPath = UEXImageUtil.getImageCacheDir(context) + File.separator
                 + Constants.COMPRESS_TEMP_FILE_PREFIX + new Date().getTime()
                 + "." + Constants.COMPRESS_TEMP_FILE_SUFFIX;
         new File(desPath);
@@ -111,6 +111,23 @@ public class ImageAgent {
             e.printStackTrace();
         }
         mEuExImage.cbCompressImage(cbJson.toString());
+    }
+
+    public void clearOutputImages(Context context) {
+        delDir(UEXImageUtil.getImageCacheDir(context));
+        delDir(Environment.getExternalStorageDirectory().getAbsolutePath()
+                + File.separator + Constants.TEMP_PATH);
+    }
+
+    private void delDir(String filePath) {
+        File directory = new File(filePath);
+        if (directory.exists()) {
+            for (File file : directory.listFiles()) {
+                if (!Constants.NO_MEDIA.equals(file.getName())) {
+                    file.delete();
+                }
+            }
+        }
     }
 
 }

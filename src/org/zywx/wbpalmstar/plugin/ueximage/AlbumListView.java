@@ -51,7 +51,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class AlbumListActivity extends ImageBaseView implements Serializable {
+public class AlbumListView extends ImageBaseView implements Serializable {
 
     private static final long serialVersionUID = 1L;
     public static final String TAG = "AlbumListView";
@@ -65,7 +65,7 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
     private Button btnRightTitle;
     private ImageBaseView mAlbumListActivity = null;
 
-    public AlbumListActivity(Context context, EUExImage eUExImage,
+    public AlbumListView(Context context, EUExImage eUExImage,
             int requestCode, ViewEvent viewEvent) {
         super(context, eUExImage, requestCode, viewEvent, TAG);
         onCreate(context, eUExImage);
@@ -99,31 +99,18 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView,
                             View view, int i, long l) {
-                        startPictureGridActivity(context, mEuExImage,
+                        startPictureGridView(context, mEuExImage,
                                 pictureFolders.get(i).getFolderPath(),
                                 Constants.REQUEST_IMAGE_PICKER);
                     }
                 });
     }
 
-    // @Override
-    // protected void onActivityResult(int requestCode, int resultCode,
-    // Intent data) {
-    // super.onActivityResult(requestCode, resultCode, data);
-    // if (requestCode == Constants.REQUEST_IMAGE_PICKER
-    // && resultCode == RESULT_OK) {
-    // setResult(resultCode, null);
-    // finish();
-    // }
-    // }
-
     private View.OnClickListener commonClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (v.getId() == EUExUtil.getResIdID("iv_left_on_title")) {
                 finish(TAG, Constants.OPERATION_CANCELLED);
-                // setResult(Constants.OPERATION_CANCELLED, null);
-                // finish();
             } else if (v.getId() == EUExUtil.getResIdID("btn_finish_title")) {
                 // 如果选择的图片小于最小数目，给一个提示
                 if (uexImageUtil.getCheckedItems().size() < EUEXImageConfig
@@ -135,18 +122,15 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
                             Toast.LENGTH_SHORT).show();
                 } else {
                     finish(TAG, Constants.OPERATION_CONFIRMED);
-                    // setResult(RESULT_OK, null);
-                    // finish();
                 }
             }
         }
     };
 
-    private void startPictureGridActivity(final Context context,
+    private void startPictureGridView(final Context context,
             final EUExImage mEuExImage, String filePath, int requestCode) {
-        // finish(TAG, Activity.RESULT_CANCELED);
         // 这里暂时只有Pick会调用，没有Browser
-        View imagePreviewView = new PictureGridActivity(context, mEUExImage,
+        View imagePreviewView = new PictureGridView(context, mEUExImage,
                 filePath, requestCode, new ViewEvent() {
                     @Override
                     public void resultCallBack(int requestCode,
@@ -168,13 +152,12 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
                                                         .getMaxImageCount()
                                                 + ")");
                             }
-                            // initData(context);
                             adapter.notifyDataSetChanged();
                         }
                     }
                 });
         mEUExImage.addViewToCurrentWindow(imagePreviewView,
-                PictureGridActivity.TAG,
+                PictureGridView.TAG,
                 EUEXImageConfig.getInstance().getPicGridFrame());
     }
 
@@ -192,7 +175,6 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
                     @Override
                     public void run() {
                         // 初始化完毕后，显示文件夹列表
-                        // if (!isFinishing()) {
                         ivProgressBar.clearAnimation();
                         ((View) ivProgressBar.getParent())
                                 .setVisibility(View.GONE);
@@ -200,7 +182,6 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
                                 uexImageUtil.getPictureFolderList());
                         lvAlbumList.setAdapter(adapter);
                         lvAlbumList.setVisibility(View.VISIBLE);
-                        // }
                     }
                 });
             }
@@ -289,9 +270,4 @@ public class AlbumListActivity extends ImageBaseView implements Serializable {
         }
     }
 
-    // @Override
-    // public void onBackPressed() {
-    // setResult(Constants.OPERATION_CANCELLED, null);
-    // finish();
-    // }
 }

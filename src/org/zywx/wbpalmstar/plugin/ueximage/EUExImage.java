@@ -66,7 +66,6 @@ public class EUExImage extends EUExBase {
     private File cropOutput = null;
     private Context context;
     private UEXImageUtil uexImageUtil;
-    // private ResoureFinder finder;
     /** * 保存添加到网页的view */
     private static ConcurrentHashMap<String, View> addToWebViewsMap = new ConcurrentHashMap<String, View>();
     private ImageAgent mImageAgent = null;
@@ -75,15 +74,22 @@ public class EUExImage extends EUExBase {
         super(context, eBrowserView);
         this.context = context;
         // 创建缓存文件夹
-        File f = new File(Environment.getExternalStorageDirectory(),
-                File.separator + UEXImageUtil.TEMP_PATH);
+        File f = new File(UEXImageUtil.getImageCacheDir(context));
         if (!f.exists()) {
             f.mkdirs();
+        }
+        File noMediaFile = new File(UEXImageUtil.getImageCacheDir(context)
+                + File.separator + Constants.NO_MEDIA);
+        if (!noMediaFile.exists()) {
+            try {
+                noMediaFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         CommonUtil.initImageLoader(context);
         uexImageUtil = UEXImageUtil.getInstance();
         mImageAgent = ImageAgent.getInstance();
-        // finder = ResoureFinder.getInstance(context);
     }
 
     @Override
@@ -123,7 +129,7 @@ public class EUExImage extends EUExBase {
             }
             EUEXImageConfig.getInstance().setIsOpenBrowser(false);
             setUIConfigExtend(jsonObject);
-            View albumListView = new AlbumListActivity(mContext, this,
+            View albumListView = new AlbumListView(mContext, this,
                     Constants.REQUEST_IMAGE_PICKER, new ViewEvent() {
 
                         @Override
@@ -132,11 +138,8 @@ public class EUExImage extends EUExBase {
                             callbackPickerResult(requestCode, resultCode);
                         }
                     });
-            addViewToCurrentWindow(albumListView, AlbumListActivity.TAG,
+            addViewToCurrentWindow(albumListView, AlbumListView.TAG,
                     UEXImageUtil.getFullScreenViewFrameVO(mContext, mBrwView));
-            // Intent intent = new Intent(context, AlbumListActivity.class);
-            // startActivityForResult(intent, Constants.REQUEST_IMAGE_PICKER);
-
         } catch (JSONException e) {
             if (BDebug.DEBUG) {
                 Log.i(TAG, e.getMessage());
@@ -258,8 +261,8 @@ public class EUExImage extends EUExBase {
             ViewFrameVO viewFrameVO = null;
             View imagePreviewView = null;
             if (config.isStartOnGrid()) {
-                viewTag = PictureGridActivity.TAG;
-                imagePreviewView = new PictureGridActivity(context, this, "",
+                viewTag = PictureGridView.TAG;
+                imagePreviewView = new PictureGridView(context, this, "",
                         Constants.REQUEST_IMAGE_BROWSER, new ViewEvent() {
                             @Override
                             public void resultCallBack(int requestCode,
@@ -269,9 +272,9 @@ public class EUExImage extends EUExBase {
                         });
                 viewFrameVO = config.getPicGridFrame();
             } else {
-                viewTag = ImagePreviewActivity.TAG;
-                imagePreviewView = new ImagePreviewActivity(context, this, "",
-                        0, Constants.REQUEST_IMAGE_BROWSER, new ViewEvent() {
+                viewTag = ImagePreviewView.TAG;
+                imagePreviewView = new ImagePreviewView(context, this, "", 0,
+                        Constants.REQUEST_IMAGE_BROWSER, new ViewEvent() {
                             @Override
                             public void resultCallBack(int requestCode,
                                     int resultCode) {
@@ -360,9 +363,8 @@ public class EUExImage extends EUExBase {
                 fileName = ".jpg";
             }
             // 为res对应的文件生成一个临时文件到系统中
-            File destFile = new File(Environment.getExternalStorageDirectory(),
-                    File.separator + UEXImageUtil.TEMP_PATH + File.separator
-                            + "crop_res_temp" + fileName);
+            File destFile = new File(UEXImageUtil.getImageCacheDir(mContext)
+                    + File.separator + "crop_res_temp" + fileName);
             try {
                 destFile.deleteOnExit();
                 destFile.createNewFile();
@@ -398,13 +400,14 @@ public class EUExImage extends EUExBase {
                     .fromJson(imageVOStr, CompressImageVO.class);
             mCompressImageVO.setSrcPath(BUtility
                     .makeRealPath(mCompressImageVO.getSrcPath(), mBrwView));
-            mImageAgent.compressImage(this, mCompressImageVO);
+            if (mImageAgent != null) {
+                mImageAgent.compressImage(mContext, this, mCompressImageVO);
+            }
         }
     }
 
     private void performCrop(File imageFile) {
         try {
-
             String fileName = null;
             Long time = new Date().getTime();
             if (cropUsePng) {
@@ -413,9 +416,8 @@ public class EUExImage extends EUExBase {
                 fileName = "crop_temp_" + time + ".jpg";
             }
 
-            cropOutput = new File(Environment.getExternalStorageDirectory(),
-                    File.separator + UEXImageUtil.TEMP_PATH + File.separator
-                            + fileName);
+            cropOutput = new File(UEXImageUtil.getImageCacheDir(mContext)
+                    + File.separator + fileName);
             cropOutput.createNewFile();
             Uri destination = Uri.fromFile(cropOutput);
             registerActivityResult();
@@ -469,22 +471,12 @@ public class EUExImage extends EUExBase {
         }
     }
 
-    private void removeAllViewFromCurWindow() {
-        Set<String> tagList = addToWebViewsMap.keySet();
-        for (String tag : tagList) {
-            if (!TextUtils.isEmpty(tag)) {
-                removeViewFromCurWindow(tag);
-            }
-        }
-    }
-
     private void callbackPickerResult(int requestCode, int resultCode) {
         JSONObject jsonObject = null;
         switch (requestCode) {
         case Constants.REQUEST_IMAGE_PICKER:
             switch (resultCode) {
             case Constants.OPERATION_CONFIRMED:
-                // removeAllViewFromCurWindow();
                 jsonObject = uexImageUtil.getChoosedPicInfo(context);
                 callBackPluginJs(JsConst.CALLBACK_ON_PICKER_CLOSED,
                         jsonObject.toString());
@@ -502,15 +494,11 @@ public class EUExImage extends EUExBase {
             default:
                 break;
             }
-            // if (!addToWebViewsMap.containsKey(AlbumListActivity.TAG)) {
             uexImageUtil.resetData();
-            // }
             break;
         case Constants.REQUEST_IMAGE_BROWSER:
-            // if (Constants.OPERATION_CONFIRMED == resultCode) {
             callBackPluginJs(JsConst.CALLBACK_ON_BROWSER_CLOSED,
                     "pic browser closed");
-            // }
             break;
         default:
             break;
@@ -691,10 +679,8 @@ public class EUExImage extends EUExBase {
 
     public void clearOutputImages(String[] params) {
         JSONObject jsonResult = new JSONObject();
-        File directory = new File(Environment.getExternalStorageDirectory(),
-                File.separator + UEXImageUtil.TEMP_PATH);
-        for (File file : directory.listFiles()) {
-            file.delete();
+        if (mImageAgent != null) {
+            mImageAgent.clearOutputImages(mContext);
         }
         try {
             jsonResult.put(Constants.JK_STATUSE, Constants.JK_OK);

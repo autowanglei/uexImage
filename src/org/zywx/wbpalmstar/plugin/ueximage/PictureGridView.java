@@ -58,7 +58,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 //以九宫格的形式显示某个文件夹下的图片列表
-public class PictureGridActivity extends ImageBaseView {
+public class PictureGridView extends ImageBaseView {
     public static final String TAG = "PictureGridView";
     /*
      * 当打开系统图库时folderName才会有值，如果是打开图片选择器，此处图片信息将完全从系统中读。并且用户可以做选择图片的操作。
@@ -80,24 +80,11 @@ public class PictureGridActivity extends ImageBaseView {
     private OnClickListener finishGridListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-            // int resultCode = Constants.REQUEST_IMAGE_BROWSER;
-            // if (isOpenBrowser) {
-            // resultCode = Activity.RESULT_OK;
-            // } else {
-            // resultCode = Activity.RESULT_CANCELED;
-            // // }
-            // if (mViewEvent != null) {
-            // mViewEvent.resultCallBack();
-            // }
-            // int resultCode = (Constants.REQUEST_IMAGE_BROWSER ==
-            // mRequestCode)
-            // ? Constants.OPERATION_CANCELLED
-            // : Constants.OPERATION_CONFIRMED;
             finish(TAG, Constants.OPERATION_CANCELLED);
         }
     };
 
-    public PictureGridActivity(Context context, EUExImage eUExImage,
+    public PictureGridView(Context context, EUExImage eUExImage,
             String folderName, int requestCode, ViewEvent viewEvent) {
         super(context, eUExImage, requestCode, viewEvent, TAG);
         onCreate(context, folderName);
@@ -161,7 +148,6 @@ public class PictureGridActivity extends ImageBaseView {
             public void onClick(View v) {
                 if (checkedItems.size() >= EUEXImageConfig.getInstance()
                         .getMinImageCount()) {
-                    // setResult(RESULT_OK, new Intent());
                     finish(TAG, Constants.OPERATION_CONFIRMED);
                 } else {
                     String str = String.format(
@@ -315,19 +301,9 @@ public class PictureGridActivity extends ImageBaseView {
         }
     }
 
-    // @Override
-    // protected void onActivityResult(int requestCode, int resultCode,
-    // Intent data) {
-    // super.onActivityResult(requestCode, resultCode, data);
-    // if (requestCode == Constants.REQUEST_IMAGE_PICKER
-    // && resultCode == RESULT_OK) {
-    // setResult(resultCode, null);
-    // finish(TAG, resultCode);
-    // }
-    // }
     private void picPreview(Context context, int position) {
         EUEXImageConfig.getInstance().setStartIndex(position);
-        View imagePreviewView = new ImagePreviewActivity(context, mEUExImage,
+        View imagePreviewView = new ImagePreviewView(context, mEUExImage,
                 folderName, position, Constants.REQUEST_IMAGE_BROWSER_FROM_GRID,
                 new ViewEvent() {
 
@@ -346,7 +322,7 @@ public class PictureGridActivity extends ImageBaseView {
                     }
                 });
         mEUExImage.addViewToCurrentWindow(imagePreviewView,
-                ImagePreviewActivity.TAG,
+                ImagePreviewView.TAG,
                 EUEXImageConfig.getInstance().getPicPreviewFrame());
     }
 

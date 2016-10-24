@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/plugin_uex_image_grid_bg_colors"
-    tools:context="org.zywx.wbpalmstar.plugin.ueximage.PictureGridActivity">
+    tools:context="org.zywx.wbpalmstar.plugin.ueximage.PictureGridView">
     <include layout="@layout/plugin_uex_image_common_title" />
 
     <GridView
