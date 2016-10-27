@@ -215,11 +215,7 @@ public class ImagePreviewView extends ImageBaseView {
                 cbChoose.setChecked(
                         checkedItems.contains(picList.get(i).getSrc()));
             }
-            if (1 == picList.size()) {
-                tvTitle.setText("1" + "/" + picList.size());
-            } else {
-                tvTitle.setText((picIndex + 1) + "/" + picList.size());
-            }
+            setImageTitle();
         }
 
         @Override
@@ -343,8 +339,12 @@ public class ImagePreviewView extends ImageBaseView {
         }
     }
 
+    private void setImageTitle() {
+        tvTitle.setText((picIndex + 1) + "/" + picList.size());
+    }
+
     private void initViewForPicker(final Context context) {
-        tvTitle.setText(folderName);
+        setImageTitle();
         ivGoBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -519,11 +519,7 @@ public class ImagePreviewView extends ImageBaseView {
         if (!isOpenBrowser) {
             cbChoose.setChecked(checkedItems.contains(picList.get(picIndex)));
         }
-        if (1 == picList.size()) {
-            tvTitle.setText("1" + "/" + picList.size());
-        } else {
-            tvTitle.setText((picIndex + 1) + "/" + picList.size());
-        }
+        setImageTitle();
     }
 
     private void toogleView() {
