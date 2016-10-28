@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.zywx.wbpalmstar.base.BDebug;
+import org.zywx.wbpalmstar.base.BUtility;
 import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.model.PictureInfo;
 import org.zywx.wbpalmstar.plugin.ueximage.util.CommonUtil;
@@ -30,9 +31,12 @@ import org.zywx.wbpalmstar.plugin.ueximage.util.Constants;
 import org.zywx.wbpalmstar.plugin.ueximage.util.EUEXImageConfig;
 import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
 import org.zywx.wbpalmstar.plugin.ueximage.vo.ImageLongClickCBVO;
+import org.zywx.wbpalmstar.plugin.ueximage.widget.PhotoView;
 
 import com.ace.universalimageloader.core.DisplayImageOptions;
 import com.ace.universalimageloader.core.ImageLoader;
+import com.ace.universalimageloader.core.assist.FailReason;
+import com.ace.universalimageloader.core.listener.ImageLoadingListener;
 
 import android.content.Context;
 import android.content.Intent;
@@ -60,7 +64,6 @@ public class ImagePreviewView extends ImageBaseView {
 
     public final static String TAG = "ImagePreviewView";
     private ViewPager viewPager;
-    private String folderName;
     private ImageView ivGoBack;
     private TextView tvTitle;
     private Button btnFinishInTitle;
@@ -68,7 +71,7 @@ public class ImagePreviewView extends ImageBaseView {
     private TextView tvCheckbox;
     private List<String> checkedItems;
     private UEXImageUtil uexImageUtil;
-    private ImageView imageView;
+    // private ImageView imageView;
     private List<PictureInfo> picList;
     private int picIndex;
     private boolean isOpenBrowser;
@@ -76,14 +79,14 @@ public class ImagePreviewView extends ImageBaseView {
     private TextView tvShare;
     private TextView tvToGrid;
     /** * 切换到Grid浏览模式 */
-    private ImageView ivToGrid;
+    private static ImageView ivToGrid;
     private RelativeLayout rlTitle;
     private RelativeLayout rlBottom;
     private AlphaAnimation fadeInAnim;
     private AlphaAnimation fadeOutAnim;
     private ImageBaseView mImagePreviewActivity = null;
     /** *单张浏览模式下，3s没有任何操作，隐藏切换到Grid浏览模式的ImageView */
-    private Handler hideIvToGridHandler = new Handler() {
+    private static Handler hideIvToGridHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -127,38 +130,48 @@ public class ImagePreviewView extends ImageBaseView {
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            LayoutInflater inflater = (LayoutInflater) container.getContext()
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View view = inflater.inflate(
-                    EUExUtil.getResLayoutID("plugin_uex_image_view_pager_item"),
-                    null);
-            imageView = (ImageView) view
-                    .findViewById(EUExUtil.getResIdID("image"));
+
+            final PhotoView imageView = new PhotoView(mContext);
+            ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
+            layoutParams.height = container.getMeasuredHeight();
+            layoutParams.width = container.getMeasuredWidth();
+            imageView.setLayoutParams(layoutParams);
+            imageView.enable();
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
             // 显示图片的配置
             DisplayImageOptions options = new DisplayImageOptions.Builder()
                     .cacheInMemory(true).cacheOnDisk(true)
                     .bitmapConfig(Bitmap.Config.RGB_565)
-                    .showImageOnFail(
-                            EUExUtil.getResIdID("plugin_uex_demo_image"))
-                    .showImageOnLoading(
-                            EUExUtil.getResIdID("plugin_uex_image_loading"))
                     .considerExifParams(true)// 考虑Exif旋转
                     .build();
-
             final String src = picList.get(position).getSrc();
-            if (!isOpenBrowser) {
-                ImageLoader.getInstance().displayImage(src, imageView, options);
-            } else {// 浏览图片：对于传入的图片的加载
-                if (src.substring(0, 4).equalsIgnoreCase(Constants.HTTP)) {
-                    // 如果是从网上下载图片，需要将下载后的图片存到缓存中
-                    ImageLoader.getInstance().displayImage(src, imageView,
-                            options);
-                } else {
-                    Bitmap bitmap = CommonUtil.getLocalImage(mContext, src);
-                    imageView.setImageBitmap(bitmap);
+            ImageLoader.getInstance().displayImage(getRealImageUrl(src),
+                    imageView, options, new ImageLoadingListener() {
+                        @Override
+                        public void onLoadingStarted(String s, View view) {
+                            BDebug.i("onLoadingStarted");
+                        }
+
+                        @Override
+                        public void onLoadingFailed(String s, View view,
+                                FailReason failReason) {
+                            BDebug.i("onLoadingFailed");
+                        }
+
+                        @Override
+                        public void onLoadingComplete(String s, View view,
+                                Bitmap bitmap) {
+                            BDebug.i("onLoadingComplete", s);
+                            BDebug.i(imageView.getWidth(),
+                                    imageView.getHeight());
+                        }
+
+                        @Override
+                        public void onLoadingCancelled(String s, View view) {
+                            BDebug.i("onLoadingCancelled");
                 }
-            }
+                    });
             imageView.setOnClickListener(imageClickListener);
             imageView.setOnLongClickListener(new OnLongClickListener() {
 
@@ -170,8 +183,8 @@ public class ImagePreviewView extends ImageBaseView {
                     return false;
                 }
             });
-            container.addView(view);
-            return view;
+            container.addView(imageView);
+            return imageView;
         }
 
         @Override
@@ -332,7 +345,6 @@ public class ImagePreviewView extends ImageBaseView {
             picList = uexImageUtil.transformData(imageDataArray);
             picIndex = EUEXImageConfig.getInstance().getStartIndex();
         } else {
-            folderName = folder;
             picIndex = index;
             checkedItems = uexImageUtil.getCheckedItems();
             picList = uexImageUtil.getCurrentPicList();
@@ -534,6 +546,24 @@ public class ImagePreviewView extends ImageBaseView {
             rlBottom.setVisibility(View.VISIBLE);
             rlBottom.startAnimation(fadeInAnim);
         }
+    }
+
+    private String getRealImageUrl(String imgUrl) {
+        String realImgUrl = null;
+        if (imgUrl.startsWith(BUtility.F_Widget_RES_SCHEMA)) {
+            String assetFileName = BUtility.F_Widget_RES_path
+                    + imgUrl.substring(BUtility.F_Widget_RES_SCHEMA.length());
+            realImgUrl = "assets://" + assetFileName;
+        } else if (imgUrl.startsWith(BUtility.F_FILE_SCHEMA)) {
+            realImgUrl = imgUrl;
+        } else if (imgUrl.startsWith(BUtility.F_Widget_RES_path)) {
+            realImgUrl = "assets://" + imgUrl;
+        } else if (imgUrl.startsWith("/")) {
+            realImgUrl = BUtility.F_FILE_SCHEMA + imgUrl;
+        } else {
+            realImgUrl = imgUrl;
+        }
+        return realImgUrl;
     }
 
     private void initAnimation() {
