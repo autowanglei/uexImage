@@ -16,6 +16,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.vo.PicSizeVO;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Environment;
 
 public class ImageAgent {
@@ -32,85 +33,96 @@ public class ImageAgent {
         private static final ImageAgent sInstance = new ImageAgent();
     }
 
-    public void compressImage(Context context, EUExImage mEuExImage,
-            CompressImageVO mCompressImageVO) {
-        String status = Constants.JK_OK;
-        String srcPath = mCompressImageVO.getSrcPath();
+    public void compressImage(final Context context, final EUExImage mEuExImage,
+            final CompressImageVO mCompressImageVO) {
+        new AsyncTask<Void, Void, Void>() {
 
-        String desPath = UEXImageUtil.getImageCacheDir(context) + File.separator
-                + Constants.COMPRESS_TEMP_FILE_PREFIX + new Date().getTime()
-                + "." + Constants.COMPRESS_TEMP_FILE_SUFFIX;
-        new File(desPath);
-        int desLength = mCompressImageVO.getDesLength();
+            @Override
+            protected Void doInBackground(Void... params) {
+                String status = Constants.JK_OK;
+                String srcPath = mCompressImageVO.getSrcPath();
 
-        PicSizeVO mPicSizeVO = UEXImageUtil.getPicSizeVOList(desLength);
-        int length = desLength - 2 * 1024;
-        float desH = mPicSizeVO.height;
-        float desW = mPicSizeVO.width;
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inJustDecodeBounds = true;
-        Bitmap bitmap = BitmapFactory.decodeFile(srcPath, opts);
-        opts.inJustDecodeBounds = false;
-        int picW = opts.outWidth;
-        int picH = opts.outHeight;
-        int size = 0;
-        if (picW <= desW && picH <= desH) {
-            size = 1;
-        } else {
-            double scale = (picW >= picH) ? (picW / desW) : (picH / desH);
-            size = UEXImageUtil.getInSampleSize(scale);
-        }
-        opts.inSampleSize = size;
-        bitmap = BitmapFactory.decodeFile(srcPath, opts);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int quality = 100;
-        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
-        int fileLength = baos.toByteArray().length;
-        JSONObject cbJson = new JSONObject();
-        try {
-            while (true) {
-                while ((fileLength > length) && (quality > 40)) {
-                    baos.reset();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
-                    quality -= 20;
-                    fileLength = baos.toByteArray().length;
-                }
-                if (fileLength > length) {
-                    baos.writeTo(new FileOutputStream(desPath));
-                    opts = new BitmapFactory.Options();
-                    opts.inJustDecodeBounds = true;
-                    bitmap = BitmapFactory.decodeFile(desPath, opts);
-                    opts.inJustDecodeBounds = false;
-                    opts.inSampleSize = UEXImageUtil
-                            .getInSampleSize(fileLength / desLength);
-                    bitmap = BitmapFactory.decodeFile(srcPath, opts);
-                    baos.reset();
-                    quality = 100;
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
-                    fileLength = baos.toByteArray().length;
+                String desPath = UEXImageUtil.getImageCacheDir(context)
+                        + File.separator + Constants.COMPRESS_TEMP_FILE_PREFIX
+                        + new Date().getTime() + "."
+                        + Constants.COMPRESS_TEMP_FILE_SUFFIX;
+                new File(desPath);
+                int desLength = mCompressImageVO.getDesLength();
+
+                PicSizeVO mPicSizeVO = UEXImageUtil.getPicSizeVOList(desLength);
+                int length = desLength - 2 * 1024;
+                float desH = mPicSizeVO.height;
+                float desW = mPicSizeVO.width;
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inJustDecodeBounds = true;
+                Bitmap bitmap = BitmapFactory.decodeFile(srcPath, opts);
+                opts.inJustDecodeBounds = false;
+                int picW = opts.outWidth;
+                int picH = opts.outHeight;
+                int size = 0;
+                if (picW <= desW && picH <= desH) {
+                    size = 1;
                 } else {
-                    break;
+                    double scale = (picW >= picH) ? (picW / desW)
+                            : (picH / desH);
+                    size = UEXImageUtil.getInSampleSize(scale);
+                }
+                opts.inSampleSize = size;
+                bitmap = BitmapFactory.decodeFile(srcPath, opts);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                int quality = 100;
+                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+                int fileLength = baos.toByteArray().length;
+                JSONObject cbJson = new JSONObject();
+                try {
+                    while (true) {
+                        while ((fileLength > length) && (quality > 40)) {
+                            baos.reset();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, quality,
+                                    baos);
+                            quality -= 20;
+                            fileLength = baos.toByteArray().length;
+                        }
+                        if (fileLength > length) {
+                            baos.writeTo(new FileOutputStream(desPath));
+                            opts = new BitmapFactory.Options();
+                            opts.inJustDecodeBounds = true;
+                            bitmap = BitmapFactory.decodeFile(desPath, opts);
+                            opts.inJustDecodeBounds = false;
+                            opts.inSampleSize = UEXImageUtil
+                                    .getInSampleSize(fileLength / desLength);
+                            bitmap = BitmapFactory.decodeFile(srcPath, opts);
+                            baos.reset();
+                            quality = 100;
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, quality,
+                                    baos);
+                            fileLength = baos.toByteArray().length;
+                        } else {
+                            break;
+                        }
+                }
+                    baos.writeTo(new FileOutputStream(desPath));
+                    cbJson.put(Constants.JK_FILE_PATH, desPath);
+                } catch (Exception e) {
+                    status = Constants.JK_FAIL;
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        baos.flush();
+                        baos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                 }
             }
-            baos.writeTo(new FileOutputStream(desPath));
-            cbJson.put(Constants.JK_FILE_PATH, desPath);
-        } catch (Exception e) {
-            status = Constants.JK_FAIL;
-            e.printStackTrace();
-        } finally {
             try {
-                baos.flush();
-                baos.close();
-            } catch (IOException e) {
+                    cbJson.put(Constants.JK_STATUSE, status);
+                } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }
-        try {
-            cbJson.put(Constants.JK_STATUSE, status);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        mEuExImage.cbCompressImage(cbJson.toString());
+                mEuExImage.cbCompressImage(cbJson.toString());
+                return null;
+            }
+        }.execute();
     }
 
     public void clearOutputImages(Context context) {
