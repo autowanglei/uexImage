@@ -270,44 +270,33 @@ public class PictureGridView extends ImageBaseView {
                 } else {
                     ImageSize targetImageSize = new ImageSize(320, 240);
                     imageView.setTag(url);
-                    ImageLoader.getInstance()
-                            .loadImage(url, targetImageSize, options, new ImageLoadingListener() {
-                                
+                    ImageLoader.getInstance().loadImage(url, targetImageSize,
+                            options, new ImageLoadingListener() {
+
                                 @Override
-                                public void onLoadingStarted(String arg0, View arg1) {
-                                    // TODO Auto-generated method stub
-                                    
+                                public void onLoadingStarted(String arg0,
+                                        View arg1) {
                                 }
-                                
+
                                 @Override
-                                public void onLoadingFailed(String arg0, View arg1, FailReason arg2) {
-                                    // TODO Auto-generated method stub
-                                    
+                                public void onLoadingFailed(String arg0,
+                                        View arg1, FailReason arg2) {
                                 }
-                                
+
                                 @Override
-                                public void onLoadingComplete(String arg0, View arg1, Bitmap bitmap) {
-                                    // TODO Auto-generated method stub
-                                            String path = imageView.getTag()
-                                                    .toString();
-                                            if (path.equals(url)) {
-                                                imageView
-                                                        .setImageBitmap(bitmap);
-                                            }
-                                            // imageView.setImageBitmap(bitmap);
-                                    
+                                public void onLoadingComplete(String arg0,
+                                        View arg1, Bitmap bitmap) {
+                                    String path = imageView.getTag().toString();
+                                    if (path.equals(url)) {
+                                        imageView.setImageBitmap(bitmap);
+                                    }
                                 }
-                                
+
                                 @Override
-                                public void onLoadingCancelled(String arg0, View arg1) {
-                                    // TODO Auto-generated method stub
-                                    
+                                public void onLoadingCancelled(String arg0,
+                                        View arg1) {
                                 }
                             }, null);
-                    // UEXImageUtil.setThumbBitmap(imageView, new PicSizeVO(
-                    // Constants.HEIGHT_10K, Constants.WIDTH_10K), url,
-                    // options);
-                    
                 }
             } else {// 浏览图片：对于传入的图片的加载
                 String url = pictureInfo.getSrc();
