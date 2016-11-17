@@ -20,7 +20,6 @@ import android.os.AsyncTask;
 import android.os.Environment;
 
 public class ImageAgent {
-    private static ImageAgent mImageAgent = null;
 
     private ImageAgent() {
     }

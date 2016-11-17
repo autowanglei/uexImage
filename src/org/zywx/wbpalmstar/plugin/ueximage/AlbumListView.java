@@ -31,6 +31,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
 
 import com.ace.universalimageloader.core.DisplayImageOptions;
 import com.ace.universalimageloader.core.ImageLoader;
+import com.ace.universalimageloader.core.assist.ImageScaleType;
 import com.ace.universalimageloader.core.display.SimpleBitmapDisplayer;
 import com.ace.universalimageloader.core.imageaware.ImageAware;
 import com.ace.universalimageloader.core.imageaware.ImageViewAware;
@@ -65,8 +66,8 @@ public class AlbumListView extends ImageBaseView implements Serializable {
     private Button btnRightTitle;
     private ImageBaseView mAlbumListActivity = null;
 
-    public AlbumListView(Context context, EUExImage eUExImage,
-            int requestCode, ViewEvent viewEvent) {
+    public AlbumListView(Context context, EUExImage eUExImage, int requestCode,
+            ViewEvent viewEvent) {
         super(context, eUExImage, requestCode, viewEvent, TAG);
         onCreate(context, eUExImage);
         mAlbumListActivity = this;
@@ -156,8 +157,7 @@ public class AlbumListView extends ImageBaseView implements Serializable {
                         }
                     }
                 });
-        mEUExImage.addViewToCurrentWindow(imagePreviewView,
-                PictureGridView.TAG,
+        mEUExImage.addViewToCurrentWindow(imagePreviewView, PictureGridView.TAG,
                 EUEXImageConfig.getInstance().getPicGridFrame());
     }
 
@@ -197,14 +197,8 @@ public class AlbumListView extends ImageBaseView implements Serializable {
             pictureFolders = folders;
             this.folders = folders;
             this.context = context;
-            options = new DisplayImageOptions.Builder().cacheInMemory(true)
-                    .cacheOnDisk(false)
-                    .showImageForEmptyUri(
-                            EUExUtil.getResIdID("plugin_uex_image_loading"))
-                    .showImageOnFail(
-                            EUExUtil.getResIdID("plugin_uex_image_loading"))
-                    .showImageOnLoading(
-                            EUExUtil.getResIdID("plugin_uex_image_loading"))
+            options = new DisplayImageOptions.Builder().cacheInMemory(false)
+                    .imageScaleType(ImageScaleType.EXACTLY).cacheOnDisk(true)
                     .bitmapConfig(Bitmap.Config.RGB_565)
                     .displayer(new SimpleBitmapDisplayer())
                     .considerExifParams(true)// 考虑Exif旋转

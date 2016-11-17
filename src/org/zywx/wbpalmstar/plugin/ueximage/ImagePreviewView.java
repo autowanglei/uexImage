@@ -36,6 +36,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.widget.PhotoView;
 import com.ace.universalimageloader.core.DisplayImageOptions;
 import com.ace.universalimageloader.core.ImageLoader;
 import com.ace.universalimageloader.core.assist.FailReason;
+import com.ace.universalimageloader.core.assist.ImageScaleType;
 import com.ace.universalimageloader.core.listener.ImageLoadingListener;
 
 import android.content.Context;
@@ -141,8 +142,8 @@ public class ImagePreviewView extends ImageBaseView {
 
             // 显示图片的配置
             DisplayImageOptions options = new DisplayImageOptions.Builder()
-                    .cacheInMemory(true).cacheOnDisk(true)
-                    .bitmapConfig(Bitmap.Config.RGB_565)
+                    .imageScaleType(ImageScaleType.EXACTLY).cacheInMemory(false)
+                    .cacheOnDisk(true).bitmapConfig(Bitmap.Config.RGB_565)
                     .considerExifParams(true)// 考虑Exif旋转
                     .build();
             final String src = picList.get(position).getSrc();
@@ -170,7 +171,7 @@ public class ImagePreviewView extends ImageBaseView {
                         @Override
                         public void onLoadingCancelled(String s, View view) {
                             BDebug.i("onLoadingCancelled");
-                }
+                        }
                     });
             imageView.setOnClickListener(imageClickListener);
             imageView.setOnLongClickListener(new OnLongClickListener() {

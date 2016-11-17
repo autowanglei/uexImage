@@ -34,6 +34,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.model.PictureInfo;
 
 import com.ace.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.ace.universalimageloader.cache.memory.impl.LRULimitedMemoryCache;
+import com.ace.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.ace.universalimageloader.core.ImageLoader;
 import com.ace.universalimageloader.core.ImageLoaderConfiguration;
 import com.ace.universalimageloader.core.assist.QueueProcessingType;
@@ -56,6 +57,7 @@ public class CommonUtil {
     public static void initImageLoader(Context context) {
         ImageLoaderConfiguration.Builder config = new ImageLoaderConfiguration.Builder(context);
         config.threadPriority(Thread.NORM_PRIORITY);
+        config.memoryCache(new WeakMemoryCache());
         config.denyCacheImageMultipleSizesInMemory();
         config.memoryCacheExtraOptions(480, 800);
         config.memoryCacheSize((int) Runtime.getRuntime().maxMemory() / 4);
@@ -64,7 +66,8 @@ public class CommonUtil {
         config.diskCacheSize(30 * 1024 * 1024);
         config.tasksProcessingOrder(QueueProcessingType.LIFO);
         //修改连接超时时间5秒，下载超时时间20秒
-        config.imageDownloader(new BaseImageDownloader(context, 5 * 1000, 20 * 1000));
+        config.imageDownloader(new BaseImageDownloader(
+                context.getApplicationContext(), 5 * 1000, 20 * 1000));
         // Initialize ImageLoader with configuration.
         ImageLoader.getInstance().init(config.build());
     }
@@ -110,6 +113,7 @@ public class CommonUtil {
             if(CommonUtil.isPicture(path)) {
                 PictureInfo pictureInfo = new PictureInfo();
                 pictureInfo.setLastModified(f.lastModified());
+                // pictureInfo.setSrc(path);
                 pictureInfo.setSrc("file://" + path);
                 list.add(pictureInfo);
             }

@@ -44,6 +44,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.vo.ViewFrameVO;
 
 import com.ace.universalimageloader.core.DisplayImageOptions;
 import com.ace.universalimageloader.core.ImageLoader;
+import com.ace.universalimageloader.core.assist.ImageScaleType;
 import com.ace.universalimageloader.core.display.SimpleBitmapDisplayer;
 
 import android.app.Activity;
@@ -180,8 +181,9 @@ public class UEXImageUtil {
     // 此处会将选择的图片先复制一份到指定位置，再返回选择的图片的基本信息。
     public JSONObject getChoosedPicInfo(Context context) {
         DisplayImageOptions options = new DisplayImageOptions.Builder()
-                .cacheInMemory(false).cacheOnDisk(false)
-                .displayer(new SimpleBitmapDisplayer()).considerExifParams(true)// 考虑Exif旋转
+                .imageScaleType(ImageScaleType.EXACTLY).cacheInMemory(false)
+                .cacheOnDisk(false).displayer(new SimpleBitmapDisplayer())
+                .considerExifParams(true)// 考虑Exif旋转
                 .build();
         File f;
         JSONArray filePathArray = new JSONArray();

@@ -33,10 +33,13 @@ import org.zywx.wbpalmstar.plugin.ueximage.util.UEXImageUtil;
 
 import com.ace.universalimageloader.core.DisplayImageOptions;
 import com.ace.universalimageloader.core.ImageLoader;
+import com.ace.universalimageloader.core.assist.FailReason;
 import com.ace.universalimageloader.core.assist.ImageScaleType;
+import com.ace.universalimageloader.core.assist.ImageSize;
 import com.ace.universalimageloader.core.display.SimpleBitmapDisplayer;
 import com.ace.universalimageloader.core.imageaware.ImageAware;
 import com.ace.universalimageloader.core.imageaware.ImageViewAware;
+import com.ace.universalimageloader.core.listener.ImageLoadingListener;
 import com.ace.universalimageloader.core.listener.PauseOnScrollListener;
 import com.ace.universalimageloader.core.listener.SimpleImageLoadingListener;
 
@@ -186,15 +189,8 @@ public class PictureGridView extends ImageBaseView {
         public MyAdapter(Context context, List<PictureInfo> paths) {
             this.paths = paths;
             contextAdapter = context;
-            options = new DisplayImageOptions.Builder().cacheInMemory(true)
-                    .cacheOnDisk(false)
-                    .showImageForEmptyUri(
-                            EUExUtil.getResIdID("plugin_uex_image_loading"))
-                    .showImageOnFail(
-                            EUExUtil.getResIdID("plugin_uex_image_loading"))
-                    .showImageOnLoading(
-                            EUExUtil.getResIdID("plugin_uex_image_loading"))
-                    .bitmapConfig(Bitmap.Config.RGB_565)
+            options = new DisplayImageOptions.Builder().cacheInMemory(false)
+                    .cacheOnDisk(true).bitmapConfig(Bitmap.Config.RGB_565)
                     .imageScaleType(ImageScaleType.EXACTLY)
                     .displayer(new SimpleBitmapDisplayer())
                     .considerExifParams(true)// 考虑Exif旋转
@@ -262,13 +258,57 @@ public class PictureGridView extends ImageBaseView {
             PictureInfo pictureInfo = paths.get(i);
 
             if (!isOpenBrowser) {
-                ImageAware imageAware = new ImageViewAware(viewHolder.imageView,
-                        false);
-                ImageLoader.getInstance().displayImage(pictureInfo.getSrc(),
-                        imageAware, options, loadingListener, null);
-                viewHolder.checkBox.setTag(pictureInfo.getSrc());
-                viewHolder.checkBox.setChecked(
-                        checkedItems.contains(pictureInfo.getSrc()));
+                final String url = pictureInfo.getSrc();
+                if (url.substring(0, 4).equalsIgnoreCase(Constants.HTTP)) {
+                    ImageAware imageAware = new ImageViewAware(
+                            viewHolder.imageView, false);
+                    ImageLoader.getInstance().displayImage(url, imageAware,
+                            options, loadingListener, null);
+                    viewHolder.checkBox.setTag(pictureInfo.getSrc());
+                    viewHolder.checkBox.setChecked(
+                            checkedItems.contains(pictureInfo.getSrc()));
+                } else {
+                    ImageSize targetImageSize = new ImageSize(320, 240);
+                    imageView.setTag(url);
+                    ImageLoader.getInstance()
+                            .loadImage(url, targetImageSize, options, new ImageLoadingListener() {
+                                
+                                @Override
+                                public void onLoadingStarted(String arg0, View arg1) {
+                                    // TODO Auto-generated method stub
+                                    
+                                }
+                                
+                                @Override
+                                public void onLoadingFailed(String arg0, View arg1, FailReason arg2) {
+                                    // TODO Auto-generated method stub
+                                    
+                                }
+                                
+                                @Override
+                                public void onLoadingComplete(String arg0, View arg1, Bitmap bitmap) {
+                                    // TODO Auto-generated method stub
+                                            String path = imageView.getTag()
+                                                    .toString();
+                                            if (path.equals(url)) {
+                                                imageView
+                                                        .setImageBitmap(bitmap);
+                                            }
+                                            // imageView.setImageBitmap(bitmap);
+                                    
+                                }
+                                
+                                @Override
+                                public void onLoadingCancelled(String arg0, View arg1) {
+                                    // TODO Auto-generated method stub
+                                    
+                                }
+                            }, null);
+                    // UEXImageUtil.setThumbBitmap(imageView, new PicSizeVO(
+                    // Constants.HEIGHT_10K, Constants.WIDTH_10K), url,
+                    // options);
+                    
+                }
             } else {// 浏览图片：对于传入的图片的加载
                 String url = pictureInfo.getSrc();
                 if (pictureInfo.getThumb() != null) {
