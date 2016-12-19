@@ -132,7 +132,7 @@
 	
 	function compressImage() {
         var params = {
-                srcPath : "/storage/emulated/0/DCIM/Camera/IMG_20161010_093830.jpg",
+                srcPath : "/storage/emulated/0/Android/data/powerchina.eportal/cache/uex_image_temp/crop_temp_1481965850096.png",
                 desLength : 30*1024
         };
         var data = JSON.stringify(params);
@@ -148,6 +148,7 @@
 			uexImage.cbClearOutputImages = cbClearOutputImages;
 			uexImage.onImageLongClicked = onImageLongClicked;
 			uexImage.cbCompressImage = cbCompressImage;
+	        uexImage.cbOpen = cbOpen;
 		}
 	}
 
@@ -159,6 +160,9 @@
 	
 	function cbOpenPicker(info) {
 	    alert("cbOpenPicker:" + info);
+	}
+	function cbOpen() {
+	    alert("cbOpen:");
 	}
 	function cbCompressImage(info) {
 	    alert("cbCompressImage:" + info);

@@ -268,6 +268,7 @@ public class PictureGridView extends ImageBaseView {
                     viewHolder.checkBox.setChecked(
                             checkedItems.contains(pictureInfo.getSrc()));
                 } else {
+                    viewHolder.checkBox.setTag(pictureInfo.getSrc());
                     ImageSize targetImageSize = new ImageSize(320, 240);
                     imageView.setTag(url);
                     ImageLoader.getInstance().loadImage(url, targetImageSize,

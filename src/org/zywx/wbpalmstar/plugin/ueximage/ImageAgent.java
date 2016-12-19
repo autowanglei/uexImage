@@ -90,12 +90,12 @@ public class ImageAgent {
                             opts.inJustDecodeBounds = false;
                             opts.inSampleSize = UEXImageUtil
                                     .getInSampleSize(fileLength / desLength);
-                            bitmap = BitmapFactory.decodeFile(srcPath, opts);
+                            bitmap = BitmapFactory.decodeFile(desPath, opts);
                             baos.reset();
-                            quality = 100;
                             bitmap.compress(Bitmap.CompressFormat.JPEG, quality,
                                     baos);
                             fileLength = baos.toByteArray().length;
+                            quality = 100;
                         } else {
                             break;
                         }
