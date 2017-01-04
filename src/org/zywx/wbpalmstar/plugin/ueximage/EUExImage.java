@@ -45,6 +45,7 @@ import org.zywx.wbpalmstar.plugin.ueximage.vo.ViewFrameVO;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -504,38 +505,14 @@ public class EUExImage extends EUExBase {
         }
     }
 
-    // @Override
-    // public void onActivityResult(int requestCode, int resultCode, Intent
-    // data) {
-    // super.onActivityResult(requestCode, resultCode, data);
-    // // 裁剪图片
-    // if (requestCode == Constants.REQUEST_CROP) {
-    // cropCallBack(resultCode);
-    // }
-    // // 选择图片
-    // if (requestCode == Constants.REQUEST_IMAGE_PICKER) {
-    // if (resultCode == Activity.RESULT_OK) {
-    // JSONObject jsonObject = uexImageUtil.getChoosedPicInfo(context);
-    // callBackPluginJs(JsConst.CALLBACK_ON_PICKER_CLOSED,
-    // jsonObject.toString());
-    // } else if (resultCode == Constants.OPERATION_CANCELLED) {
-    // JSONObject jsonObject = new JSONObject();
-    // try {
-    // jsonObject.put("isCancelled", true);
-    // } catch (JSONException e) {
-    // e.printStackTrace();
-    // }
-    // callBackPluginJs(JsConst.CALLBACK_ON_PICKER_CLOSED,
-    // jsonObject.toString());
-    // }
-    // uexImageUtil.resetData();
-    // }
-    // // 浏览图片
-    // if (requestCode == Constants.REQUEST_IMAGE_BROWSER) {
-    // callBackPluginJs(JsConst.CALLBACK_ON_BROWSER_CLOSED,
-    // "pic browser closed");
-    // }
-    // }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // 裁剪图片
+        if (requestCode == Constants.REQUEST_CROP) {
+            cropCallBack(resultCode);
+        }
+    }
 
     private void cropCallBack(int resultCode) {
         // 如果是用户取消，则删除这个临时文件

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
     <plugin
-        uexName="uexImage" version="3.0.19.25" build="20">
+        uexName="uexImage" version="3.0.19.26" build="20">
         <info>20:24.修复选择图片崩溃的问题。
-                 25.修复个别手机压缩图片出错的问题。</info>
+                 25.修复个别手机压缩图片出错的问题。
+                 26.修复没有onCropperClosed回调的问题。</info>
         <build>20:16.更改插件缓存图片路径；修改插件选择图片时，不显示缓存图片。
                   17.修复显示大图出错的问题。
                   18.修复压缩图片在主线程执行引起应用卡死的问题。
